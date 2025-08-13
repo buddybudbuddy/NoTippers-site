@@ -1,0 +1,6 @@
+<!doctype html>
+<html>
+  <body>
+    <img src="homepage.jpg" alt="Test image" style="max-width:100%;">
+  </body>
+</html>
