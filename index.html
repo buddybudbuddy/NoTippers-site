@@ -73,7 +73,12 @@
         opacity: .9;
         line-height: 1.5;
       }
-      .hero--real .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+      .hero--real .cta { 
+        display: inline-flex; 
+        gap: 12px; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+      }
       .hero--real .btn {
         display: inline-block;
         background: #0d6efd;
@@ -83,7 +88,19 @@
         border-radius: 12px;
         font-weight: 700;
       }
-      .hero--real .btn:hover { filter: brightness(1.05); }
+      .hero--real .btn:hover { 
+        filter: brightness(1.05); 
+      }
+      .hero--real .link {
+        display: inline-block;
+        color: #cfe2ff;
+        text-decoration: none;
+        padding: 12px 8px;
+        font-weight: 500;
+      }
+      .hero--real .link:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
@@ -96,6 +113,7 @@
           <p class="tagline">Crowd-powered tip awareness for gig workers.</p>
           <div class="cta">
             <a class="btn" href="signup.html">Sign up</a>
+            <a class="link" href="learn-more.html">Learn more</a>
           </div>
         </div>
       </section>
