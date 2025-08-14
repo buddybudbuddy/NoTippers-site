@@ -1,140 +1,170 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign Up | NoTippers</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #f8f9fa;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-      header {
-        background: #0d6efd;
-        color: white;
-        padding: 12px 20px;
-        font-size: 20px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-      }
-      header .logo {
-        font-weight: bold;
-      }
-      header nav {
-        display: flex;
-        gap: 16px;
-      }
-      header nav a {
-        color: white;
-        text-decoration: none;
-        font-size: 14px;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 6px 10px;
-        border-radius: 6px;
-      }
-      header nav a:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
-      main {
-        flex: 1;
-        max-width: 500px;
-        margin: 0 auto;
-        padding: 20px;
-      }
-      h1 {
-        font-size: 28px;
-        margin-bottom: 20px;
-        text-align: center;
-        color: #0d6efd;
-      }
-      form {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      }
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-      }
-      input, select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 16px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 16px;
-      }
-      button {
-        width: 100%;
-        background: #0d6efd;
-        color: white;
-        padding: 12px;
-        font-size: 16px;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #0b5ed7;
-      }
-      footer {
-        background: #f1f3f5;
-        text-align: center;
-        padding: 12px;
-        font-size: 14px;
-        color: #555;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="logo">NoTippers</div>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="learn-more.html">Learn More</a>
-        <a href="signup.html">Sign Up</a>
-      </nav>
-    </header>
-    <main>
-      <h1>Sign Up</h1>
-      <form action="#" method="post">
-        <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" required>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign Up | NoTippers</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #0d6efd;
+      color: white;
+      padding: 12px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    header .logo {
+      font-weight: bold;
+    }
+    header nav {
+      display: flex;
+      gap: 16px;
+    }
+    header nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    header nav a:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    main {
+      flex: 1;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #0d6efd;
+    }
+    p.privacy {
+      font-size: 14px;
+      background: #e7f1ff;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      border: 1px solid #b6d4fe;
+    }
+    form {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    select[multiple] {
+      height: 120px;
+    }
+    button {
+      width: 100%;
+      background: #0d6efd;
+      color: white;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0b5ed7;
+    }
+    footer {
+      background: #f1f3f5;
+      text-align: center;
+      padding: 12px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">NoTippers</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="learn-more.html">Learn More</a>
+      <a href="signup.html">Sign Up</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Sign Up</h1>
+    <p class="privacy">
+      We value your privacy. Your personal information will never be shared.  
+      When you submit names and addresses of non-tippers, your identity will remain 100% anonymous.
+    </p>
+    <form action="#" method="post">
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" required>
 
-        <label for="state">State</label>
-        <select id="state" name="state" required>
-          <option value="">Select your state</option>
-          <option>Alabama</option>
-          <option>Alaska</option>
-          <option>Arizona</option>
-          <option>Arkansas</option>
-          <option>California</option>
-          <!-- Add rest of states here -->
-        </select>
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
 
-        <label for="county">County</label>
-        <input type="text" id="county" name="county" required>
+      <label for="state">State</label>
+      <select id="state" name="state" required>
+        <option value="">Select your state</option>
+        <option>Alabama</option>
+        <option>Alaska</option>
+        <option>Arizona</option>
+        <option>Arkansas</option>
+        <option>California</option>
+        <!-- Add rest of states here -->
+      </select>
 
-        <label for="region">Delivery Region</label>
-        <input type="text" id="region" name="region" required>
+      <label for="county">County</label>
+      <input type="text" id="county" name="county" required>
 
-        <button type="submit">Create Account</button>
-      </form>
-    </main>
-    <footer>© <span id="y"></span> NoTippers</footer>
-    <script>
-      document.getElementById('y').textContent = new Date().getFullYear();
-    </script>
-  </body>
+      <label for="region">Delivery Region</label>
+      <input type="text" id="region" name="region" required>
+
+      <label for="companies">Select Gig Companies</label>
+      <select id="companies" name="companies[]" multiple required>
+        <option>Shipt</option>
+        <option>Instacart</option>
+        <option>Uber</option>
+        <option>DoorDash</option>
+        <option>Lyft</option>
+        <option>Grubhub</option>
+        <option>Other</option>
+      </select>
+
+      <button type="submit">Create Account</button>
+    </form>
+  </main>
+  <footer>© <span id="y"></span> NoTippers</footer>
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
 </html>
