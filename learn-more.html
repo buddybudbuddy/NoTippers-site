@@ -23,16 +23,24 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: wrap;
       }
-      header a {
+      header .logo {
+        font-weight: bold;
+      }
+      header nav {
+        display: flex;
+        gap: 16px;
+      }
+      header nav a {
         color: white;
         text-decoration: none;
         font-size: 14px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         padding: 6px 10px;
         border-radius: 6px;
       }
-      header a:hover {
+      header nav a:hover {
         background: rgba(255, 255, 255, 0.3);
       }
       main {
@@ -72,8 +80,12 @@
   </head>
   <body>
     <header>
-      NoTippers
-      <a href="index.html">← Back to Home</a>
+      <div class="logo">NoTippers</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="learn-more.html">Learn More</a>
+        <a href="signup.html">Sign Up</a>
+      </nav>
     </header>
     <main>
       <h1>Learn More About NoTippers</h1>
