@@ -90,9 +90,9 @@
       </select>
       <div class="hint">Hold Command (Mac) or Ctrl (Windows) to select multiple.</div>
 
-      <!-- Honeypot (spam) -->
+      <!-- Honeypot -->
       <input type="text" name="_gotcha" style="display:none">
-      <!-- Optional: label emails in Formspree -->
+      <!-- Optional subject for Formspree email -->
       <input type="hidden" name="_subject" value="New NoTippers signup">
 
       <button type="submit">Create Account</button>
@@ -109,14 +109,14 @@
     const ok = document.getElementById('msg-ok');
     const err = document.getElementById('msg-err');
 
-    function show(el){ el.style.display = 'block'; }
-    function hide(el){ el.style.display = 'none'; }
+    function show(el){ el.style.display='block'; }
+    function hide(el){ el.style.display='none'; }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hide(ok); hide(err);
 
-      // quick front-end validation
+      // Minimal client validation
       const required = ['name','email','state','county','region'];
       for (const id of required) {
         const v = form[id].value.trim();
@@ -130,10 +130,8 @@
           body: new FormData(form)
         });
         if (res.ok) {
-          ok.textContent = "Thanks! Your info was received.";
-          show(ok);
-          form.reset();
-          form.state.value = ""; // reset the select
+          // Instant client-side redirect to your thank-you page
+          window.location.href = "thank-you.html";
         } else {
           err.textContent = "Sorry—something went wrong. Please try again.";
           show(err);
