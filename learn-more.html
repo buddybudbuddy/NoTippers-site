@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Learn More | NoTippers</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: #f8f9fa;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header {
+        background: #0d6efd;
+        color: white;
+        padding: 12px 20px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+      main {
+        flex: 1;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 28px;
+        color: #0d6efd;
+      }
+      p {
+        line-height: 1.6;
+        margin-bottom: 1.2em;
+      }
+      footer {
+        background: #f1f3f5;
+        text-align: center;
+        padding: 12px;
+        font-size: 14px;
+        color: #555;
+      }
+      a.back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #0d6efd;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      a.back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <header>NoTippers</header>
+    <main>
+      <h1>About NoTippers</h1>
+      <p>
+        NoTippers is a crowd-powered platform that helps gig workers share and discover 
+        information about non-tippers in their delivery regions. By joining the community, 
+        you can help others avoid unpaid labor and make informed decisions before accepting orders.
+      </p>
+      <p>
+        Our mission is to empower delivery drivers and gig workers with the knowledge they need 
+        to maximize earnings, improve job satisfaction, and encourage fair tipping practices.
+      </p>
+      <p>
+        Whether you're a seasoned driver or new to gig work, NoTippers provides a space 
+        to collaborate, share, and protect your time and effort.
+      </p>
+      <a href="index.html" class="back-link">← Back to Home</a>
+    </main>
+    <footer>© <span id="y"></span> NoTippers</footer>
+    <script>
+      document.getElementById('y').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
