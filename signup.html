@@ -5,108 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sign Up | NoTippers</title>
   <style>
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: #f8f9fa;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    header {
-      background: #0d6efd;
-      color: white;
-      padding: 12px 20px;
-      font-size: 20px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-    header .logo {
-      font-weight: bold;
-    }
-    header nav {
-      display: flex;
-      gap: 16px;
-    }
-    header nav a {
-      color: white;
-      text-decoration: none;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 6px 10px;
-      border-radius: 6px;
-    }
-    header nav a:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-    main {
-      flex: 1;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
-      text-align: center;
-      color: #0d6efd;
-    }
-    p.privacy {
-      font-size: 14px;
-      background: #e7f1ff;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      line-height: 1.4;
-      border: 1px solid #b6d4fe;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    select[multiple] {
-      height: 120px;
-    }
-    button {
-      width: 100%;
-      background: #0d6efd;
-      color: white;
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0b5ed7;
-    }
-    footer {
-      background: #f1f3f5;
-      text-align: center;
-      padding: 12px;
-      font-size: 14px;
-      color: #555;
-    }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f8f9fa; color:#333; display:flex; flex-direction:column; min-height:100vh; }
+    header { background:#0d6efd; color:#fff; padding:12px 20px; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    header .logo { font-weight:bold; }
+    header nav { display:flex; gap:16px; }
+    header nav a { color:#fff; text-decoration:none; font-size:14px; background:rgba(255,255,255,.15); padding:6px 10px; border-radius:6px; }
+    header nav a:hover { background:rgba(255,255,255,.3); }
+    main { flex:1; max-width:540px; margin:0 auto; padding:20px; }
+    h1 { font-size:28px; margin:0 0 10px; text-align:center; color:#0d6efd; }
+    p.privacy { font-size:14px; background:#e7f1ff; padding:10px; border-radius:8px; margin:0 0 16px; line-height:1.45; border:1px solid #b6d4fe; }
+    .alert { display:none; margin:12px 0; padding:10px; border-radius:8px; font-size:14px; }
+    .ok { background:rgba(81,207,102,.12); border:1px solid rgba(81,207,102,.35); color:#1b5e20; }
+    .err { background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35); color:#7a0000; }
+    form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    label { display:block; margin-bottom:6px; font-weight:600; }
+    input, select { width:100%; padding:10px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+    select[multiple] { height:140px; }
+    .hint { margin:-10px 0 12px; font-size:12px; color:#666; }
+    button { width:100%; background:#0d6efd; color:#fff; padding:12px; font-size:16px; border:0; border-radius:6px; font-weight:700; cursor:pointer; }
+    button:hover { background:#0b5ed7; }
+    footer { background:#f1f3f5; text-align:center; padding:12px; font-size:14px; color:#555; }
   </style>
 </head>
 <body>
@@ -118,35 +36,47 @@
       <a href="signup.html">Sign Up</a>
     </nav>
   </header>
+
   <main>
     <h1>Sign Up</h1>
     <p class="privacy">
-      We value your privacy. Your personal information will never be shared.  
+      We value your privacy. Your personal information will never be shared.<br/>
       When you submit names and addresses of non-tippers, your identity will remain 100% anonymous.
     </p>
-    <form action="#" method="post">
+
+    <div id="msg-ok" class="alert ok">Thanks! Your info was received.</div>
+    <div id="msg-err" class="alert err">Sorry—something went wrong. Please try again.</div>
+
+    <form id="signupForm" novalidate>
       <label for="name">Full Name</label>
-      <input type="text" id="name" name="name" required>
+      <input id="name" name="name" required>
 
       <label for="email">Email</label>
-      <input type="email" id="email" name="email" required>
+      <input id="email" name="email" type="email" required>
 
       <label for="state">State</label>
       <select id="state" name="state" required>
         <option value="">Select your state</option>
-        <option>Alabama</option>
-        <option>Alaska</option>
-        <option>Arizona</option>
-        <option>Arkansas</option>
-        <option>California</option>
-        <!-- Add rest of states here -->
+        <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+        <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+        <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+        <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+        <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+        <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+        <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+        <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+        <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+        <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+        <option>SD</option><option>TN</option><option>TX</option><option>UT</option>
+        <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+        <option>WI</option><option>WY</option>
       </select>
 
       <label for="county">County</label>
-      <input type="text" id="county" name="county" required>
+      <input id="county" name="county" required>
 
       <label for="region">Delivery Region</label>
-      <input type="text" id="region" name="region" required>
+      <input id="region" name="region" required>
 
       <label for="companies">Select Gig Companies</label>
       <select id="companies" name="companies[]" multiple required>
@@ -158,13 +88,61 @@
         <option>Grubhub</option>
         <option>Other</option>
       </select>
+      <div class="hint">Hold Command (Mac) or Ctrl (Windows) to select multiple.</div>
+
+      <!-- Honeypot (spam) -->
+      <input type="text" name="_gotcha" style="display:none">
+      <!-- Optional: label emails in Formspree -->
+      <input type="hidden" name="_subject" value="New NoTippers signup">
 
       <button type="submit">Create Account</button>
     </form>
   </main>
+
   <footer>© <span id="y"></span> NoTippers</footer>
+
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
+
+    const FORM_ENDPOINT = "https://formspree.io/f/mkgzevrb"; // your Formspree URL
+    const form = document.getElementById('signupForm');
+    const ok = document.getElementById('msg-ok');
+    const err = document.getElementById('msg-err');
+
+    function show(el){ el.style.display = 'block'; }
+    function hide(el){ el.style.display = 'none'; }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hide(ok); hide(err);
+
+      // quick front-end validation
+      const required = ['name','email','state','county','region'];
+      for (const id of required) {
+        const v = form[id].value.trim();
+        if (!v) { err.textContent = "Please fill out all required fields."; show(err); return; }
+      }
+
+      try {
+        const res = await fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { "Accept": "application/json" },
+          body: new FormData(form)
+        });
+        if (res.ok) {
+          ok.textContent = "Thanks! Your info was received.";
+          show(ok);
+          form.reset();
+          form.state.value = ""; // reset the select
+        } else {
+          err.textContent = "Sorry—something went wrong. Please try again.";
+          show(err);
+        }
+      } catch {
+        err.textContent = "Network error. Please try again.";
+        show(err);
+      }
+    });
   </script>
 </body>
 </html>
