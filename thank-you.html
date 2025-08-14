@@ -7,17 +7,20 @@
   <meta name="description" content="Thanks for joining NoTippers — the community helping gig workers earn more and waste less time." />
   <style>
     :root{
-      --brand:#0d6efd; --bg:#0a0b0f; --text:#e6e9ee; --muted:#9aa4b2;
-      --confetti1:#7ae582; --confetti2:#ffd43b; --confetti3:#ffa94d; --confetti4:#74c0fc;
+      --brand:#0d6efd; 
+      --bg:#0a0b0f; 
+      --text:#e6e9ee; 
+      --money:#4caf50; 
+      --muted:#9aa4b2;
     }
     *{box-sizing:border-box}
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: radial-gradient(1000px 500px at 80% -10%, rgba(13,110,253,.25), transparent 60%), #0a0b0f;
+      background: radial-gradient(1000px 500px at 80% -10%, rgba(76,175,80,.2), transparent 60%), #0a0b0f;
       color:var(--text); display:flex; flex-direction:column; min-height:100vh;
     }
 
-    /* Header / nav */
+    /* Header */
     header{
       background: linear-gradient(180deg, rgba(10,11,15,.85), rgba(10,11,15,.55));
       border-bottom: 1px solid rgba(255,255,255,.06);
@@ -25,12 +28,24 @@
       display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
       position:sticky; top:0; z-index:10; backdrop-filter:saturate(1.2) blur(6px);
     }
-    header .logo{font-weight:800; letter-spacing:.2px}
+    header .logo{font-weight:800}
     header nav{display:flex; gap:12px; flex-wrap:wrap}
     header nav a{color:#fff; text-decoration:none; font-size:14px; background:rgba(255,255,255,.12); padding:6px 10px; border-radius:8px}
     header nav a:hover{background:rgba(255,255,255,.22)}
 
-    main{flex:1; display:grid; place-items:center; padding:28px 16px}
+    main{flex:1; display:grid; place-items:center; padding:28px 16px; position:relative; overflow:hidden}
+
+    /* Floating $ signs */
+    .dollars { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .dollars span {
+      position:absolute; font-size: clamp(18px, 3vw, 32px); color: var(--money); font-weight: 800;
+      animation: floatDollar linear infinite; opacity: .85;
+    }
+    @keyframes floatDollar {
+      0% { transform: translateY(110%); opacity:0; }
+      10% { opacity:1; }
+      100% { transform: translateY(-120%); opacity:0; }
+    }
 
     /* Card */
     .card{
@@ -41,57 +56,43 @@
       padding: clamp(18px, 4vw, 36px);
       text-align:center;
       position:relative;
-      overflow:hidden;
+      z-index:1;
       box-shadow: 0 12px 36px rgba(0,0,0,.35);
-    }
-
-    /* Confetti layers */
-    .confetti{
-      position:absolute; inset:0; pointer-events:none; opacity:.9;
-      background:
-        radial-gradient(6px 6px at 10% 15%, var(--confetti1) 98%, transparent 100%),
-        radial-gradient(5px 5px at 25% 30%, var(--confetti2) 98%, transparent 100%),
-        radial-gradient(6px 6px at 40% 12%, var(--confetti3) 98%, transparent 100%),
-        radial-gradient(6px 6px at 55% 25%, var(--confetti4) 98%, transparent 100%),
-        radial-gradient(6px 6px at 70% 10%, var(--confetti2) 98%, transparent 100%),
-        radial-gradient(6px 6px at 85% 28%, var(--confetti1) 98%, transparent 100%),
-        radial-gradient(6px 6px at 20% 80%, var(--confetti3) 98%, transparent 100%),
-        radial-gradient(6px 6px at 45% 88%, var(--confetti4) 98%, transparent 100%),
-        radial-gradient(6px 6px at 68% 76%, var(--confetti2) 98%, transparent 100%),
-        radial-gradient(6px 6px at 88% 84%, var(--confetti1) 98%, transparent 100%);
-      animation: drift 14s linear infinite;
-    }
-    @keyframes drift {
-      0% { transform: translateY(-10px); }
-      50%{ transform: translateY(8px); }
-      100%{ transform: translateY(-10px); }
     }
 
     .icon{
       display:inline-grid; place-items:center; width:72px; height:72px; margin:0 auto 12px;
-      border-radius:18px; background: linear-gradient(135deg, var(--brand), #6aa9ff);
-      box-shadow: 0 10px 28px rgba(13,110,253,.45);
+      border-radius:18px; background: linear-gradient(135deg, var(--money), #81c784);
+      box-shadow: 0 10px 28px rgba(76,175,80,.45);
+      font-size: 36px; color:#fff;
     }
-    .icon svg{ width:40px; height:40px; fill:#fff }
 
-    h1{ margin:8px 0 6px; font-size: clamp(24px, 5vw, 36px); }
+    h1{ margin:8px 0 6px; font-size: clamp(24px, 5vw, 36px); color:var(--money) }
     p{ margin:0 auto 16px; max-width:60ch; color:#cfd6e3; line-height:1.6 }
     .money{ font-weight:700; color:#a3ffb8 }
 
     .cta{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:14px }
     .btn{
-      display:inline-block; background:var(--brand); color:#fff; text-decoration:none;
+      display:inline-block; background:var(--money); color:#fff; text-decoration:none;
       padding:12px 16px; border-radius:12px; font-weight:800;
     }
     .btn:hover{ filter:brightness(1.05) }
     .ghost{ display:inline-block; color:#cfe2ff; text-decoration:none; padding:12px 10px; border-radius:10px; }
     .ghost:hover{ text-decoration:underline }
 
+    /* Share row */
+    .share { margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+    .share button, .share a {
+      border:1px solid rgba(255,255,255,.2);
+      background:rgba(255,255,255,.08);
+      color:#fff; text-decoration:none; padding:10px 12px; border-radius:10px; font-weight:700; cursor:pointer;
+    }
+    .share button:hover, .share a:hover { background:rgba(255,255,255,.16) }
+    .hint { color:var(--muted); font-size:12px; margin-top:6px }
+
     footer{ color:#9aa4b2; text-align:center; padding:16px; border-top:1px solid rgba(255,255,255,.06) }
 
-    @media (max-width:700px){
-      .card{ padding:22px }
-    }
+    @media (max-width:700px){ .card{ padding:22px } }
   </style>
 </head>
 <body>
@@ -105,27 +106,74 @@
   </header>
 
   <main>
-    <div class="card" role="status" aria-live="polite">
-      <div class="confetti" aria-hidden="true"></div>
-      <div class="icon" aria-hidden="true">
-        <!-- Dollar/check icon -->
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 1.75a.75.75 0 0 1 .75.75v1.138c2.23.29 4 1.77 4 4.112 0 2.77-2.55 3.72-4.97 4.37-2.01.55-3.03 1.06-3.03 2.13 0 1.13 1.09 1.96 3 2.1v-1.1a.75.75 0 1 1 1.5 0V18a.75.75 0 0 1-1.5 0v-.12c-2.53-.25-4.5-1.64-4.5-3.76 0-2.52 2.24-3.49 4.66-4.14 2.13-.58 3.34-1.12 3.34-2.35 0-1.01-.83-1.93-2.5-2.16V7a.75.75 0 0 1-1.5 0V2.5a.75.75 0 0 1 .75-.75Z"/>
-        </svg>
-      </div>
-      <h1>Thank you for joining!</h1>
+    <!-- Floating dollar signs -->
+    <div class="dollars">
+      <span style="left:5%; animation-duration:9s;">$</span>
+      <span style="left:15%; animation-duration:12s;">$</span>
+      <span style="left:30%; animation-duration:10s;">$</span>
+      <span style="left:50%; animation-duration:8s;">$</span>
+      <span style="left:70%; animation-duration:11s;">$</span>
+      <span style="left:85%; animation-duration:13s;">$</span>
+    </div>
+
+    <div class="card">
+      <div class="icon">$</div>
+      <h1>Cha-Ching! You're In!</h1>
       <p>
         You’re part of the fastest-growing network where gig workers help <em>other</em> gig workers.
-        Our goal is to help you — and everyone here — <span class="money">earn more</span> and <span class="money">waste less time</span>.
+        Our mission: help you <span class="money">earn more</span> and <span class="money">waste less time</span> — starting now.
       </p>
+
       <div class="cta">
         <a class="btn" href="index.html">Back to Home</a>
         <a class="ghost" href="learn-more.html">See how it works</a>
       </div>
+
+      <!-- Share -->
+      <div class="share">
+        <button id="share-native" type="button" title="Share">Share</button>
+        <a id="share-x" href="#" rel="noopener" title="Share on X" target="_blank">Share on X</a>
+        <a id="share-fb" href="#" rel="noopener" title="Share on Facebook" target="_blank">Share on Facebook</a>
+        <button id="share-copy" type="button" title="Copy link">Copy Link</button>
+      </div>
+      <div class="hint">Spread the word — help more drivers keep more tips.</div>
     </div>
   </main>
 
   <footer>© <span id="y"></span> NoTippers</footer>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Share helpers
+    const pageUrl = "https://www.notippers.com/";
+    const text = "I just joined NoTippers — the community helping gig workers earn more and waste less time.";
+    const via = "NoTippers"; // optional
+
+    const xUrl = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(pageUrl) + "&via=" + encodeURIComponent(via);
+    const fbUrl = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(pageUrl) + "&quote=" + encodeURIComponent(text);
+
+    document.getElementById('share-x').href = xUrl;
+    document.getElementById('share-fb').href = fbUrl;
+
+    document.getElementById('share-copy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pageUrl);
+        alert("Link copied! Share it with your crew.");
+      } catch {
+        prompt("Copy this link:", pageUrl);
+      }
+    });
+
+    document.getElementById('share-native').addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: "NoTippers", text, url: pageUrl });
+        } catch(e) { /* user canceled */ }
+      } else {
+        window.open(xUrl, "_blank", "noopener");
+      }
+    });
+  </script>
 </body>
 </html>
