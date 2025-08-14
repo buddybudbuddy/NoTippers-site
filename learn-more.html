@@ -23,18 +23,29 @@
       }
       main {
         flex: 1;
-        max-width: 900px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 20px;
       }
       h1 {
-        margin-top: 0;
-        font-size: 28px;
         color: #0d6efd;
+        margin-bottom: 10px;
       }
       p {
         line-height: 1.6;
-        margin-bottom: 1.2em;
+        margin-bottom: 16px;
+      }
+      a.btn {
+        display: inline-block;
+        background: #0d6efd;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      a.btn:hover {
+        filter: brightness(1.05);
       }
       footer {
         background: #f1f3f5;
@@ -43,36 +54,24 @@
         font-size: 14px;
         color: #555;
       }
-      a.back-link {
-        display: inline-block;
-        margin-top: 20px;
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: bold;
-      }
-      a.back-link:hover {
-        text-decoration: underline;
-      }
     </style>
   </head>
   <body>
     <header>NoTippers</header>
     <main>
-      <h1>About NoTippers</h1>
+      <h1>Learn More About NoTippers</h1>
       <p>
-        NoTippers is a crowd-powered platform that helps gig workers share and discover 
-        information about non-tippers in their delivery regions. By joining the community, 
-        you can help others avoid unpaid labor and make informed decisions before accepting orders.
+        NoTippers is a community-driven platform designed to help gig workers share 
+        and discover tipping habits in their delivery areas. Whether you’re a driver, 
+        courier, or shopper, our goal is to help you make informed decisions about 
+        where and when to work.
       </p>
       <p>
-        Our mission is to empower delivery drivers and gig workers with the knowledge they need 
-        to maximize earnings, improve job satisfaction, and encourage fair tipping practices.
+        By joining our community, you can report non-tippers, view tip maps, and 
+        connect with other gig workers in your area. Our mission is to create 
+        transparency and help gig workers maximize their earnings.
       </p>
-      <p>
-        Whether you're a seasoned driver or new to gig work, NoTippers provides a space 
-        to collaborate, share, and protect your time and effort.
-      </p>
-      <a href="index.html" class="back-link">← Back to Home</a>
+      <a class="btn" href="signup.html">Sign Up Now</a>
     </main>
     <footer>© <span id="y"></span> NoTippers</footer>
     <script>
