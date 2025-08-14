@@ -1,155 +1,200 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NoTippers</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        background: #f8f9fa;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-      header {
-        background: #0d6efd;
-        color: white;
-        padding: 12px 20px;
-        font-size: 20px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-      }
-      header .logo {
-        font-weight: bold;
-      }
-      header nav {
-        display: flex;
-        gap: 16px;
-      }
-      header nav a {
-        color: white;
-        text-decoration: none;
-        font-size: 14px;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 6px 10px;
-        border-radius: 6px;
-      }
-      header nav a:hover {
-        background: rgba(255, 255, 255, 0.3);
-      }
-      main {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-      }
-      footer {
-        background: #f1f3f5;
-        text-align: center;
-        padding: 12px;
-        font-size: 14px;
-        color: #555;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NoTippers — Earn More. Waste Less.</title>
+  <meta name="description" content="NoTippers helps gig workers avoid unpaid labor, choose better orders, and maximize earnings." />
+  <style>
+    :root{
+      --bg:#0a0b0f; --panel:#0f1117; --muted:#9aa4b2; --text:#e6e9ee; --brand:#0d6efd; --brand-2:#6aa9ff;
+      --ring:rgba(13,110,253,.35); --ok:#51cf66; --warn:#ffd43b; --card:#11131a; --border:#1b1f2a;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(13,110,253,.25), transparent 60%) , var(--bg);
+      color:var(--text); display:flex; flex-direction:column; min-height:100vh;
+    }
 
-      /* --- Real hero section --- */
-      .hero--real {
-        position: relative;
-        max-width: 1100px;
-        width: 100%;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,.2);
-        background: #0b0b0b;
-        min-height: clamp(360px, 50vw, 560px);
-        display: grid;
-        place-items: center;
-      }
-      .hero--real .hero-bg {
-        position: absolute; inset: 0;
-        background: url('homepage.jpg') center/cover no-repeat;
-        filter: brightness(.55) saturate(1.05);
-      }
-      .hero--real .hero-content {
-        position: relative;
-        z-index: 1;
-        padding: clamp(16px, 4vw, 40px);
-        text-align: center;
-        color: #fff;
-        max-width: 780px;
-      }
-      .hero--real h1 {
-        margin: 0 0 10px;
-        font-size: clamp(28px, 5vw, 52px);
-        letter-spacing: 0.2px;
-      }
-      .hero--real .tagline {
-        margin: 0 auto 22px;
-        font-size: clamp(14px, 2.5vw, 18px);
-        opacity: .9;
-        line-height: 1.5;
-      }
-      .hero--real .cta { 
-        display: inline-flex; 
-        gap: 12px; 
-        flex-wrap: wrap; 
-        justify-content: center; 
-      }
-      .hero--real .btn {
-        display: inline-block;
-        background: #0d6efd;
-        color: #fff;
-        text-decoration: none;
-        padding: 12px 18px;
-        border-radius: 12px;
-        font-weight: 700;
-      }
-      .hero--real .btn:hover { 
-        filter: brightness(1.05); 
-      }
-      .hero--real .link {
-        display: inline-block;
-        color: #cfe2ff;
-        text-decoration: none;
-        padding: 12px 8px;
-        font-weight: 500;
-      }
-      .hero--real .link:hover {
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="logo">NoTippers</div>
-      <nav>
-        <a href="index.html">Home</a>
-        <a href="learn-more.html">Learn More</a>
-        <a href="signup.html">Sign Up</a>
-      </nav>
-    </header>
-    <main>
-      <section class="hero hero--real">
-        <div class="hero-bg" aria-hidden="true"></div>
-        <div class="hero-content">
-          <h1>NoTippers</h1>
-          <p class="tagline">Crowd-powered tip awareness for gig workers.</p>
-          <div class="cta">
-            <a class="btn" href="signup.html">Sign up</a>
-            <a class="link" href="learn-more.html">Learn more</a>
-          </div>
+    /* Header/Nav */
+    header{
+      position:sticky; top:0; z-index:100; backdrop-filter:saturate(1.2) blur(6px);
+      background:linear-gradient(180deg, rgba(10,11,15,.85), rgba(10,11,15,.55));
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:12px 20px;
+    }
+    .logo{font-weight:800; letter-spacing:.2px}
+    nav{display:flex; gap:12px; flex-wrap:wrap}
+    nav a{
+      color:#fff; text-decoration:none; font-size:14px; padding:8px 10px; border-radius:8px;
+      background:rgba(255,255,255,.08);
+    }
+    nav a:hover{background:rgba(255,255,255,.16)}
+
+    main{flex:1; display:flex; flex-direction:column}
+
+    /* Hero */
+    .hero{
+      display:grid; grid-template-columns:1.2fr 1fr; gap:24px; align-items:center;
+      max-width:1100px; margin:28px auto; padding:0 20px;
+    }
+    .headline{
+      font-size: clamp(28px, 5vw, 54px); line-height:1.06; margin:4px 0 10px;
+    }
+    .sub{color:var(--muted); font-size: clamp(14px, 2.8vw, 18px); margin:0 0 18px}
+    .cta{display:flex; gap:12px; flex-wrap:wrap}
+    .btn{
+      display:inline-block; background:var(--brand); color:#fff; text-decoration:none;
+      padding:12px 16px; border-radius:12px; font-weight:800;
+      box-shadow:0 8px 24px rgba(13,110,253,.35);
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .ghost{
+      display:inline-block; color:#cfe2ff; text-decoration:none; padding:12px 10px; border-radius:10px;
+    }
+    .badges{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+    .badge{
+      border:1px solid var(--border); background:var(--card); color:var(--muted);
+      padding:6px 10px; border-radius:999px; font-size:12px
+    }
+
+    /* Visual card (right side) */
+    .visual{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      min-height:260px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .visual img{display:block; width:100%; height:auto; opacity:.9}
+
+    /* Value props */
+    .section{max-width:1100px; margin:24px auto; padding:0 20px}
+    .grid{
+      display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;
+    }
+    .card{
+      background:var(--panel); border:1px solid var(--border); border-radius:16px;
+      padding:18px; min-height:140px;
+    }
+    .card h3{margin:2px 0 6px; font-size:18px}
+    .card p{margin:0; color:var(--muted); line-height:1.55}
+
+    /* How it works */
+    .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    .step{background:var(--card); border:1px dashed rgba(255,255,255,.08); border-radius:16px; padding:16px}
+    .num{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px;
+      border-radius:999px; background:var(--brand); font-weight:800; margin-bottom:8px}
+
+    /* CTA band */
+    .band{
+      max-width:1100px; margin:28px auto; padding:18px 20px;
+      background:linear-gradient(90deg, rgba(13,110,253,.25), rgba(13,110,253,.05));
+      border:1px solid var(--ring); border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .band strong{font-size:18px}
+
+    /* Footer */
+    footer{border-top:1px solid rgba(255,255,255,.06); color:var(--muted); text-align:center; padding:16px}
+
+    /* Mobile */
+    @media (max-width: 860px){
+      .hero{grid-template-columns:1fr; gap:16px}
+      .visual{order:-1}
+      .grid{grid-template-columns:1fr}
+      .steps{grid-template-columns:1fr}
+      nav{gap:8px}
+    }
+  </style>
+</head>
+<body>
+  <!-- Header / Nav -->
+  <header>
+    <div class="logo">NoTippers</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="learn-more.html">Learn More</a>
+      <a href="signup.html">Sign Up</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <p class="badge" style="display:inline-block">Built for gig workers</p>
+        <h1 class="headline">Earn More. <br/>Waste Less Time.</h1>
+        <p class="sub">NoTippers shows you where tipping is strong — and where it isn’t — so you can choose better orders and protect your time.</p>
+        <div class="cta">
+          <a class="btn" href="signup.html">Create a free account</a>
+          <a class="ghost" href="learn-more.html">How it works</a>
         </div>
-      </section>
-    </main>
-    <footer>© <span id="y"></span> NoTippers</footer>
-    <script>
-      document.getElementById('y').textContent = new Date().getFullYear();
-    </script>
-  </body>
+        <div class="badges">
+          <span class="badge">✔ Community-reported data</span>
+          <span class="badge">✔ Region-based insights</span>
+          <span class="badge">✔ 100% free to start</span>
+        </div>
+      </div>
+      <div class="visual">
+        <!-- keep your existing image as a supporting visual -->
+        <img src="homepage.jpg" alt="NoTippers app preview">
+      </div>
+    </section>
+
+    <!-- VALUE PROPS -->
+    <section class="section">
+      <div class="grid">
+        <div class="card">
+          <h3>Pick smarter orders</h3>
+          <p>See where tips are reliable so you can avoid unpaid labor and focus on money-makers.</p>
+        </div>
+        <div class="card">
+          <h3>Protect your time</h3>
+          <p>Stop chasing long, low-tip deliveries. Spend your hours where they pay.</p>
+        </div>
+        <div class="card">
+          <h3>Help the community</h3>
+          <p>Share non-tippers in your region and help fellow drivers make better choices.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+      <h2 style="margin:0 0 10px">How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <strong>Sign up & choose your region</strong>
+          <p class="sub" style="margin:.4rem 0 0">Tell us where you deliver so we can tailor insights.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <strong>Browse tip insights</strong>
+          <p class="sub" style="margin:.4rem 0 0">See patterns from the community before accepting an order.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <strong>Share & level up together</strong>
+          <p class="sub" style="margin:.4rem 0 0">Report non-tippers to help everyone earn more.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BAND -->
+    <section class="band">
+      <strong>Ready to keep more of your time — and your tips?</strong>
+      <div class="cta">
+        <a class="btn" href="signup.html">Join free</a>
+        <a class="ghost" href="learn-more.html">Learn more</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>© <span id="y"></span> NoTippers</footer>
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
 </html>
