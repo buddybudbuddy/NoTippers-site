@@ -20,6 +20,28 @@
         padding: 12px 20px;
         font-size: 20px;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      header .logo {
+        font-weight: bold;
+      }
+      header nav {
+        display: flex;
+        gap: 16px;
+      }
+      header nav a {
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+      header nav a:hover {
+        background: rgba(255, 255, 255, 0.3);
       }
       main {
         flex: 1;
@@ -73,22 +95,17 @@
         font-size: 14px;
         color: #555;
       }
-      a.back-link {
-        display: inline-block;
-        margin-top: 20px;
-        color: #0d6efd;
-        text-decoration: none;
-        font-weight: bold;
-        text-align: center;
-        width: 100%;
-      }
-      a.back-link:hover {
-        text-decoration: underline;
-      }
     </style>
   </head>
   <body>
-    <header>NoTippers</header>
+    <header>
+      <div class="logo">NoTippers</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="learn-more.html">Learn More</a>
+        <a href="signup.html">Sign Up</a>
+      </nav>
+    </header>
     <main>
       <h1>Sign Up</h1>
       <form action="#" method="post">
@@ -114,7 +131,6 @@
 
         <button type="submit">Create Account</button>
       </form>
-      <a href="index.html" class="back-link">← Back to Home</a>
     </main>
     <footer>© <span id="y"></span> NoTippers</footer>
     <script>
