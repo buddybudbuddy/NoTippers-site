@@ -105,6 +105,16 @@
       font-size: 14px;
       color: #555;
     }
+    .error {
+      display:none;
+      background:#ffe3e3;
+      border:1px solid #ffa8a8;
+      color:#7a0000;
+      padding:10px;
+      border-radius:8px;
+      margin:10px 0 0;
+      font-size:14px;
+    }
   </style>
 </head>
 <body>
@@ -124,10 +134,10 @@
       When you submit names and addresses of non-tippers, your identity will remain 100% anonymous.
     </p>
 
-    <!-- Formspree form with custom redirect -->
-    <form action="https://formspree.io/f/mkgzevrb" method="post">
-      <!-- Redirect to your thank-you page after a successful submission -->
-      <input type="hidden" name="_redirect" value="https://www.notippers.com/thank-you.html">
+    <!-- Formspree form -->
+    <form id="signupForm" action="https://formspree.io/f/mkgzevrb" method="post" novalidate>
+      <!-- We’ll handle redirect in JS to guarantee it -->
+      <input type="hidden" name="_subject" value="New NoTippers signup">
 
       <label for="name">Full Name</label>
       <input type="text" id="name" name="name" required>
@@ -164,11 +174,46 @@
       </select>
 
       <button type="submit">Create Account</button>
+      <div id="err" class="error">Sorry—couldn’t submit. Please try again.</div>
     </form>
   </main>
   <footer>© <span id="y"></span> NoTippers</footer>
+
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
+
+    const form = document.getElementById('signupForm');
+    const err = document.getElementById('err');
+    const endpoint = form.getAttribute('action');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.style.display = 'none';
+
+      // Basic required check (browser will also do this)
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (res.ok) {
+          // Guaranteed redirect to our own page
+          window.location.href = 'thank-you.html';
+        } else {
+          err.style.display = 'block';
+        }
+      } catch (e2) {
+        err.style.display = 'block';
+      }
+    });
   </script>
 </body>
 </html>
