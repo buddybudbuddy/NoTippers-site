@@ -8,15 +8,16 @@
     body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#f8f9fa; color:#333; display:flex; flex-direction:column; min-height:100vh; }
     header { background:#0d6efd; color:#fff; padding:12px 20px; font-size:20px; font-weight:bold; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; }
     header .logo { font-weight: bold; }
-    header nav { display:flex; gap:16px; }
+    header nav { display:flex; gap:16px; flex-wrap:wrap; }
     header nav a { color:#fff; text-decoration:none; font-size:14px; background:rgba(255,255,255,.15); padding:6px 10px; border-radius:6px; }
     header nav a:hover { background:rgba(255,255,255,.3); }
     main { flex:1; max-width:640px; margin:0 auto; padding:20px; }
-    h1 { color:#0d6efd; margin:0 0 10px; }
+    h1 { color:#0d6efd; margin:0 0 10px; text-align:center }
     .notice { background:#e7f1ff; border:1px solid #b6d4fe; padding:10px; border-radius:8px; font-size:14px; margin-bottom:16px; }
     form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
     label { display:block; margin-bottom:6px; font-weight:600; }
     input, select, textarea { width:100%; padding:10px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+    textarea { resize:vertical; min-height:80px; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .type, .platforms { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:8px 0 16px; }
     .checkbox { display:flex; align-items:center; gap:8px; font-size:14px; }
@@ -111,7 +112,10 @@
       <label for="notes">Notes (what happened?)</label>
       <textarea id="notes" name="notes" rows="4" placeholder="Keep it factual. No names."></textarea>
 
+      <!-- Honeypot -->
       <input type="text" name="_gotcha" style="display:none">
+      <!-- Client-side rate limit -->
+      <input type="hidden" id="lastSubmitTs" value="">
 
       <div class="actions">
         <button type="submit">Submit Report</button>
@@ -141,6 +145,14 @@
       e.preventDefault();
       hide(ok); hide(err);
 
+      // simple client-side rate limit: 15s between submissions
+      const now = Date.now();
+      const last = Number(localStorage.getItem('report_last_submit') || 0);
+      if (now - last < 15000) {
+        err.textContent = "Please wait a few seconds before submitting again.";
+        show(err); return;
+      }
+
       const address_line1 = form.address_line1.value.trim();
       const city = form.city.value.trim();
       const state = form.state.value.trim();
@@ -167,10 +179,11 @@
       try {
         const { error } = await supabase.from('reports').insert(payload);
         if (error) throw error;
-        form.reset();
-        err.textContent = "";
-        show(ok);
-        window.scrollTo({top:0, behavior:'smooth'});
+
+        localStorage.setItem('report_last_submit', String(now));
+        // Optional inline success + scroll, but we’ll redirect for a clean UX:
+        // show(ok); window.scrollTo({top:0, behavior:'smooth'});
+        window.location.href = "thank-you.html";
       } catch (e) {
         err.textContent = "Error: " + (e.message || "unable to submit");
         show(err);
