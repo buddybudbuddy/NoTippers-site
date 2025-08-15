@@ -40,6 +40,8 @@
       <a href="learn-more.html">Learn More</a>
       <a href="signup.html">Sign Up</a>
       <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
 
@@ -138,10 +140,35 @@
     const err = document.getElementById('err');
     const form = document.getElementById('reportForm');
     const submitBtn = document.getElementById('submitBtn');
+    const loginLink = document.getElementById('loginLink');
+    const logoutLink = document.getElementById('logoutLink');
 
     function show(el){ el.style.display='block'; }
     function hide(el){ el.style.display='none'; }
 
+    // --- Require login to access this page ---
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      // Toggle nav login/logout
+      if (session) {
+        loginLink.style.display = 'none';
+        logoutLink.style.display = 'inline-block';
+      } else {
+        const back = encodeURIComponent(location.pathname);
+        window.location.href = `login.html?next=${back}`;
+        return; // stop running the rest until authed
+      }
+    })();
+
+    // Log out handler
+    logoutLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabase.auth.signOut();
+      location.href = 'login.html';
+    });
+
+    // --- Submit handler ---
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hide(ok); hide(err);

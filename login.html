@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Log In | NoTippers</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f8f9fa;color:#333;display:flex;flex-direction:column;min-height:100vh}
+    header{background:#0d6efd;color:#fff;padding:12px 20px;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    header nav{display:flex;gap:12px;flex-wrap:wrap}
+    header nav a{color:#fff;text-decoration:none;font-size:14px;background:rgba(255,255,255,.15);padding:6px 10px;border-radius:6px}
+    header nav a:hover{background:rgba(255,255,255,.3)}
+    main{flex:1;max-width:460px;margin:0 auto;padding:20px}
+    h1{color:#0d6efd;text-align:center}
+    form{background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    label{display:block;margin-bottom:6px;font-weight:600}
+    input,button{width:100%;padding:10px;margin-bottom:16px;border:1px solid #ccc;border-radius:6px;font-size:16px}
+    button{background:#0d6efd;color:#fff;border:none;font-weight:700;cursor:pointer}
+    button:hover{background:#0b5ed7}
+    .msg{font-size:14px;background:#e7f1ff;border:1px solid #b6d4fe;padding:10px;border-radius:8px;display:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">NoTippers</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="learn-more.html">Learn More</a>
+      <a href="signup.html">Sign Up</a>
+      <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Log in with a Magic Link</h1>
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input id="email" type="email" required placeholder="you@example.com" autocomplete="email">
+      <button type="submit">Send Magic Link</button>
+      <div id="msg" class="msg">Check your email for the magic link.</div>
+    </form>
+  </main>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // --- Supabase client ---
+    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Show login/logout appropriately
+    const loginLink = document.getElementById('loginLink');
+    const logoutLink = document.getElementById('logoutLink');
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        loginLink.style.display = 'none';
+        logoutLink.style.display = 'inline-block';
+      }
+    })();
+    document.getElementById('logoutLink').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await supabase.auth.signOut();
+      location.reload();
+    });
+
+    // Magic-link form
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    // Preserve ?next= so we can return user where they intended
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/report.html';
+    localStorage.setItem('auth_next', next);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return;
+
+      const redirect = `${location.origin}/auth-complete.html`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirect }
+      });
+      if (error) {
+        alert(error.message || 'Unable to send link');
+        return;
+      }
+      msg.style.display = 'block';
+    });
+  </script>
+</body>
+</html>

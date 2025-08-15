@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Signing You In… | NoTippers</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0a0b0f;color:#e6e9ee;display:grid;place-items:center;min-height:100vh}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:24px;max-width:520px;text-align:center}
+    .muted{color:#9aa4b2}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Signing you in…</h1>
+    <p class="muted">Just a moment while we finish your login.</p>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (async () => {
+      // Supabase v2 will parse tokens in the URL automatically when we call getSession()
+      // If not yet established, poll briefly.
+      let tries = 0;
+      while (tries < 10) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) break;
+        await new Promise(r => setTimeout(r, 300));
+        tries++;
+      }
+      const next = localStorage.getItem('auth_next') || '/report.html';
+      window.location.href = next;
+    })();
+  </script>
+</body>
+</html>
