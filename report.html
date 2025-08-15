@@ -33,6 +33,9 @@
     footer { background:#f1f3f5; text-align:center; padding:12px; font-size:14px; color:#555; }
     @media (max-width:680px){ .row { grid-template-columns:1fr; } }
   </style>
+
+  <!-- Cloudflare Turnstile -->
+  <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 </head>
 <body>
   <header>
@@ -124,6 +127,9 @@
       <!-- Client-side rate limit -->
       <input type="hidden" id="lastSubmitTs" value="">
 
+      <!-- ✅ Turnstile widget (your Site Key) -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAABsALAJqBrXoFfV7" data-theme="light"></div>
+
       <div class="actions">
         <button id="submitBtn" type="submit">Submit Report</button>
         <button type="reset" class="secondary">Clear</button>
@@ -141,6 +147,7 @@
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
+    // Supabase from env (inlined here; we’ll move to env-only soon)
     const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -154,9 +161,8 @@
     function show(el){ el.style.display='block'; }
     function hide(el){ el.style.display='none'; }
 
-    // --- Require login to access this page ---
+    // Require login
     (async () => {
-      // Give Supabase a moment to establish session if just returned from magic link
       let tries = 0, session = null;
       while (tries < 10) {
         const resp = await supabase.auth.getSession();
@@ -165,23 +171,36 @@
         await new Promise(r => setTimeout(r, 200));
         tries++;
       }
-
       if (!session) {
         const next = encodeURIComponent(location.pathname + location.search);
         window.location.href = `login.html?next=${next}`;
         return;
       }
-      // Authed → show form
       hide(gate);
       form.style.display = 'block';
     })();
 
-    // --- Submit handler ---
+    // Verify Turnstile with our serverless API
+    async function verifyTurnstileToken(formEl) {
+      const token = formEl['cf-turnstile-response']?.value || '';
+      if (!token) return { ok:false, reason:'missing token' };
+
+      const res = await fetch('/api/verify-turnstile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      if (!res.ok) return { ok:false, reason:'endpoint error' };
+      const data = await res.json();
+      return { ok: !!data.success, reason: data.error || null };
+    }
+
+    // Submit handler
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hide(ok); hide(err);
 
-      // simple client-side rate limit: 15s between submissions
+      // 15s client-side rate limit
       const now = Date.now();
       const last = Number(localStorage.getItem('report_last_submit') || 0);
       if (now - last < 15000) {
@@ -198,6 +217,14 @@
         show(err); return;
       }
 
+      // ✅ require Turnstile pass
+      const verified = await verifyTurnstileToken(form);
+      if (!verified.ok) {
+        err.textContent = "Please complete the anti-spam check and try again.";
+        show(err);
+        return;
+      }
+
       const platforms = Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value);
 
       const payload = {
@@ -207,14 +234,12 @@
         state,
         zip: form.zip.value.trim() || null,
         type,
-        platforms, // expects text[] in Supabase
+        platforms,
         notes: form.notes.value.trim() || null,
         story_url: form.story_url.value.trim() || null
       };
 
-      // Prevent double submit
       submitBtn.disabled = true; submitBtn.textContent = "Submitting…";
-
       try {
         const { error } = await supabase.from('reports').insert(payload);
         if (error) throw error;
