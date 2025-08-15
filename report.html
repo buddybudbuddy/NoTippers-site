@@ -183,7 +183,7 @@
         localStorage.setItem('report_last_submit', String(now));
         // Optional inline success + scroll, but we’ll redirect for a clean UX:
         // show(ok); window.scrollTo({top:0, behavior:'smooth'});
-        window.location.href = "thank-you.html";
+        window.location.href = "thank-you-report.html";
       } catch (e) {
         err.textContent = "Error: " + (e.message || "unable to submit");
         show(err);
