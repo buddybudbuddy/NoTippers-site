@@ -85,6 +85,8 @@
       <a href="learn-more.html">Learn More</a>
       <a href="signup.html">Sign Up</a>
       <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
 
@@ -114,6 +116,10 @@
   </main>
 
   <footer>© <span id="y"></span> NoTippers</footer>
+
+  <!-- Supabase + shared auth nav toggles -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
 
   <!-- Confetti Script -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
