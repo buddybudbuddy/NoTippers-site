@@ -118,7 +118,7 @@
       <input type="hidden" id="lastSubmitTs" value="">
 
       <div class="actions">
-        <button type="submit">Submit Report</button>
+        <button id="submitBtn" type="submit">Submit Report</button>
         <button type="reset" class="secondary">Clear</button>
       </div>
     </form>
@@ -137,6 +137,7 @@
     const ok = document.getElementById('ok');
     const err = document.getElementById('err');
     const form = document.getElementById('reportForm');
+    const submitBtn = document.getElementById('submitBtn');
 
     function show(el){ el.style.display='block'; }
     function hide(el){ el.style.display='none'; }
@@ -171,20 +172,28 @@
         state,
         zip: form.zip.value.trim() || null,
         type,
-        platforms,
+        platforms, // expects text[] in Supabase
         notes: form.notes.value.trim() || null,
         story_url: form.story_url.value.trim() || null
       };
 
-     try {
-  const { error } = await supabase.from('reports').insert(payload);
-  if (error) throw error;
-  form.reset();
-  window.location.href = "thank-you-report.html"; // Redirect after success
-} catch (e) {
-  err.textContent = "Error: " + (e.message || "unable to submit");
-  show(err);
-}
+      // Prevent double submit
+      submitBtn.disabled = true; submitBtn.textContent = "Submitting…";
+
+      try {
+        const { error } = await supabase.from('reports').insert(payload);
+        if (error) throw error;
+
+        // Save rate-limit timestamp and redirect
+        localStorage.setItem('report_last_submit', String(now));
+        form.reset();
+        window.location.href = "thank-you-report.html";
+      } catch (e) {
+        err.textContent = "Error: " + (e.message || "unable to submit");
+        show(err);
+      } finally {
+        submitBtn.disabled = false; submitBtn.textContent = "Submit Report";
+      }
     });
   </script>
 </body>
