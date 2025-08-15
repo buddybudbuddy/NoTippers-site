@@ -45,10 +45,16 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    // --- Supabase client ---
+    // --- Supabase client (with explicit persistence) ---
     const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
 
     // Toggle login/logout in nav
     const loginLink = document.getElementById('loginLink');
@@ -81,8 +87,9 @@
       const email = document.getElementById('email').value.trim();
       if (!email) return;
 
-      // Use current origin so it works locally and on production
-      const redirect = `${location.origin}/auth-complete.html`;
+      // Force the redirect to the WWW origin to avoid session mismatch
+      const REDIRECT_BASE = 'https://www.notippers.com';
+      const redirect = `${REDIRECT_BASE}/auth-complete.html`;
 
       sendBtn.disabled = true;
       sendBtn.textContent = "Sending…";

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signing You In… | NoTippers</title>
   <style>
@@ -18,30 +19,25 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
+    // --- Supabase client (same keys used across the site) ---
     const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     (async () => {
       try {
-        // Some magic-link/email flows return ?code= in the URL. If present, exchange it.
         const url = new URL(location.href);
         const code = url.searchParams.get('code');
-        if (code) {
-          try {
-            // Newer supabase-js supports exchangeCodeForSession for PKCE/email links with code param.
-            if (typeof sb.auth.exchangeCodeForSession === 'function') {
-              await sb.auth.exchangeCodeForSession({ code });
-            }
-          } catch (ex) {
-            // Non-fatal: we'll fall back to polling getSession below
-            console.warn('exchangeCodeForSession failed:', ex);
-          }
+
+        // If we received a PKCE/email magic-link ?code=, try exchanging it explicitly.
+        if (code && typeof sb.auth.exchangeCodeForSession === 'function') {
+          try { await sb.auth.exchangeCodeForSession({ code }); }
+          catch (ex) { console.warn('exchangeCodeForSession failed (will poll getSession):', ex); }
         }
 
-        // Poll briefly until the session is available
+        // Poll until Supabase finalizes the session (covers hash-based flows too).
         let tries = 0;
-        while (tries < 12) { // ~3.6s total
+        while (tries < 20) { // ~6s total
           const { data: { session } } = await sb.auth.getSession();
           if (session) break;
           await new Promise(r => setTimeout(r, 300));
