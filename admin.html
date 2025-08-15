@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Review Reports | NoTippers</title>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0a0b0f;color:#e6e9ee;display:flex;flex-direction:column;min-height:100vh}
+    header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(10,11,15,.85),rgba(10,11,15,.55));border-bottom:1px solid rgba(255,255,255,.08);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header nav{display:flex;gap:12px;flex-wrap:wrap}
+    header nav a{color:#fff;text-decoration:none;background:rgba(255,255,255,.1);padding:6px 10px;border-radius:8px;font-size:14px}
+    header nav a:hover{background:rgba(255,255,255,.18)}
+    main{flex:1;max-width:1100px;margin:0 auto;padding:20px}
+    h1{margin:8px 0 12px}
+    .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .muted{color:#9aa4b2}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;margin:10px 0}
+    .row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:center}
+    .row small{display:block;color:#9aa4b2}
+    button{background:#0d6efd;color:#fff;border:0;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
+    button:hover{filter:brightness(1.05)}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,.25)}
+    .notice{display:none;margin:10px 0;padding:10px;border-radius:8px;font-size:14px}
+    .ok{display:none;background:rgba(81,207,102,.12);border:1px solid rgba(81,207,102,.35);color:#c8f7cf}
+    .err{display:none;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:#ffdede}
+    .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+    .tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:2px 8px;border-radius:999px;font-size:12px}
+    @media (max-width:900px){ .row{grid-template-columns:1fr 1fr;gap:8px} .row .actions{grid-column:1/-1} }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">NoTippers — Admin</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="report.html">Report Address</a>
+      <a href="admin.html">Admin</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Review Reports</h1>
+    <div class="bar">
+      <div class="muted">Unreviewed reports (latest first)</div>
+      <div>
+        <button id="refreshBtn" class="ghost">Refresh</button>
+      </div>
+    </div>
+
+    <div id="msgOk" class="notice ok">Updated.</div>
+    <div id="msgErr" class="notice err">Something went wrong.</div>
+
+    <div id="list"></div>
+
+    <div class="pager">
+      <button id="prevBtn" class="ghost">Prev</button>
+      <span id="pageInfo" class="muted"></span>
+      <button id="nextBtn" class="ghost">Next</button>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    // ---- Config ----
+    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const list = document.getElementById('list');
+    const msgOk = document.getElementById('msgOk');
+    const msgErr = document.getElementById('msgErr');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageInfo = document.getElementById('pageInfo');
+
+    const PAGE_SIZE = 10;
+    let page = 1;
+    let isAdmin = false;
+
+    function show(el){ el.style.display = 'block'; }
+    function hide(el){ el.style.display = 'none'; }
+
+    // Gate: require admin
+    (async () => {
+      // Make sure user is logged in
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        const next = encodeURIComponent(location.pathname);
+        window.location.href = `login.html?next=${next}`;
+        return;
+      }
+      // Check admin by querying admins table; RLS will allow only own record, but we just need existence
+      const { data, error } = await sb.from('admins').select('user_id').limit(1);
+      if (error || !data || data.length === 0) {
+        alert('Admin access only.');
+        window.location.href = 'index.html';
+        return;
+      }
+      isAdmin = true;
+      loadPage(1);
+    })();
+
+    async function loadPage(p) {
+      page = p;
+      list.innerHTML = '<div class="muted">Loading…</div>';
+      hide(msgOk); hide(msgErr);
+
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error } = await sb
+        .from('reports')
+        .select('id, created_at, address_line1, address_line2, city, state, zip, type, platforms, story_url, notes', { count: 'exact' })
+        .eq('is_reviewed', false)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) {
+        list.innerHTML = '';
+        msgErr.textContent = 'Error loading reports: ' + (error.message || 'unknown');
+        show(msgErr);
+        return;
+      }
+
+      pageInfo.textContent = `Page ${page}` + (data?.length < PAGE_SIZE ? ' (end)' : '');
+      renderList(data || []);
+    }
+
+    function renderList(items) {
+      if (!items.length) {
+        list.innerHTML = '<div class="card muted">No unreviewed reports 🎉</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      items.forEach(r => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <div class="row">
+            <div>
+              <strong>${escapeHtml(r.address_line1)} ${r.address_line2 ? escapeHtml(r.address_line2) : ''}</strong>
+              <small>${escapeHtml(r.city)}, ${escapeHtml(r.state)} ${r.zip ? escapeHtml(r.zip) : ''}</small>
+            </div>
+            <div>
+              <span class="tag">${r.type === 'bait_tipper' ? 'Bait-Tipper' : 'Non-Tipper'}</span>
+              ${Array.isArray(r.platforms) && r.platforms.length ? `<small>${r.platforms.map(escapeHtml).join(', ')}</small>` : ''}
+            </div>
+            <div>
+              ${r.story_url ? `<a href="${escapeAttr(r.story_url)}" target="_blank" rel="noopener">Story/Video</a>` : '<span class="muted">No link</span>'}
+            </div>
+            <div>
+              ${r.notes ? `<small>${escapeHtml(r.notes)}</small>` : '<small class="muted">No notes</small>'}
+            </div>
+            <div class="actions" style="text-align:right">
+              <button data-approve="${r.id}">Approve</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+
+      // Wire up approve buttons
+      list.querySelectorAll('button[data-approve]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-approve');
+          btn.disabled = true; btn.textContent = 'Saving…';
+          const { error } = await sb.from('reports').update({ is_reviewed: true }).eq('id', id);
+          if (error) {
+            btn.disabled = false; btn.textContent = 'Approve';
+            msgErr.textContent = 'Update failed: ' + (error.message || 'unknown');
+            show(msgErr);
+            return;
+          }
+          show(msgOk);
+          // remove row from UI
+          btn.closest('.card').remove();
+          // if list empty, reload next page
+          if (!list.children.length) loadPage(page);
+        });
+      });
+    }
+
+    function escapeHtml(s=''){ return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])) }
+    function escapeAttr(s=''){ return String(s).replace(/"/g, '&quot;') }
+
+    refreshBtn.addEventListener('click', () => loadPage(page));
+    prevBtn.addEventListener('click', () => { if (page > 1) loadPage(page - 1); });
+    nextBtn.addEventListener('click', () => loadPage(page + 1));
+  </script>
+</body>
+</html>
