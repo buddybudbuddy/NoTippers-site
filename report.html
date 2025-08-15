@@ -176,18 +176,15 @@
         story_url: form.story_url.value.trim() || null
       };
 
-      try {
-        const { error } = await supabase.from('reports').insert(payload);
-        if (error) throw error;
-
-        localStorage.setItem('report_last_submit', String(now));
-        // Optional inline success + scroll, but we’ll redirect for a clean UX:
-        // show(ok); window.scrollTo({top:0, behavior:'smooth'});
-        window.location.href = "thank-you-report.html";
-      } catch (e) {
-        err.textContent = "Error: " + (e.message || "unable to submit");
-        show(err);
-      }
+     try {
+  const { error } = await supabase.from('reports').insert(payload);
+  if (error) throw error;
+  form.reset();
+  window.location.href = "thank-you-report.html"; // Redirect after success
+} catch (e) {
+  err.textContent = "Error: " + (e.message || "unable to submit");
+  show(err);
+}
     });
   </script>
 </body>
