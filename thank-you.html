@@ -7,10 +7,10 @@
   <meta name="description" content="Thanks for joining NoTippers — the community helping gig workers earn more and waste less time." />
   <style>
     :root{
-      --brand:#0d6efd; 
-      --bg:#0a0b0f; 
-      --text:#e6e9ee; 
-      --money:#4caf50; 
+      --brand:#0d6efd;
+      --bg:#0a0b0f;
+      --text:#e6e9ee;
+      --money:#4caf50;
       --muted:#9aa4b2;
     }
     *{box-sizing:border-box}
@@ -103,6 +103,8 @@
       <a href="learn-more.html">Learn More</a>
       <a href="signup.html">Sign Up</a>
       <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
 
@@ -142,6 +144,10 @@
   </main>
 
   <footer>© <span id="y"></span> NoTippers</footer>
+
+  <!-- Supabase + shared auth nav toggles -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
