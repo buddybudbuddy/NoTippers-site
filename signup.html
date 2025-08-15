@@ -123,7 +123,12 @@
       We value your privacy. Your personal information will never be shared.  
       When you submit names and addresses of non-tippers, your identity will remain 100% anonymous.
     </p>
+
+    <!-- Formspree form with custom redirect -->
     <form action="https://formspree.io/f/mkgzevrb" method="post">
+      <!-- Redirect to your thank-you page after a successful submission -->
+      <input type="hidden" name="_redirect" value="https://www.notippers.com/thank-you.html">
+
       <label for="name">Full Name</label>
       <input type="text" id="name" name="name" required>
 
