@@ -84,8 +84,11 @@
       <a href="learn-more.html">Learn More</a>
       <a href="signup.html">Sign Up</a>
       <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
+
   <main>
     <h1>Learn More About NoTippers</h1>
     <p>
@@ -101,9 +104,14 @@
     </p>
     <a class="btn" href="signup.html">Sign Up Now</a>
   </main>
+
   <footer>© <span id="y"></span> NoTippers</footer>
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
   </script>
+
+  <!-- Auth scripts at the very end -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
 </body>
 </html>
