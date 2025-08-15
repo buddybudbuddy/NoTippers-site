@@ -38,9 +38,8 @@
       padding: 6px 10px;
       border-radius: 6px;
     }
-    header nav a:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
+    header nav a:hover { background: rgba(255, 255, 255, 0.3); }
+
     main {
       flex: 1;
       max-width: 500px;
@@ -68,11 +67,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
+    label { display: block; margin-bottom: 6px; font-weight: 600; }
     input, select {
       width: 100%;
       padding: 10px;
@@ -81,9 +76,7 @@
       border-radius: 6px;
       font-size: 16px;
     }
-    select[multiple] {
-      height: 120px;
-    }
+    select[multiple] { height: 120px; }
     button {
       width: 100%;
       background: #0d6efd;
@@ -95,9 +88,8 @@
       font-weight: bold;
       cursor: pointer;
     }
-    button:hover {
-      background: #0b5ed7;
-    }
+    button:hover { background: #0b5ed7; }
+
     footer {
       background: #f1f3f5;
       text-align: center;
@@ -106,14 +98,14 @@
       color: #555;
     }
     .error {
-      display:none;
-      background:#ffe3e3;
-      border:1px solid #ffa8a8;
-      color:#7a0000;
-      padding:10px;
-      border-radius:8px;
-      margin:10px 0 0;
-      font-size:14px;
+      display: none;
+      background: #ffe3e3;
+      border: 1px solid #ffa8a8;
+      color: #7a0000;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0 0;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -125,18 +117,20 @@
       <a href="learn-more.html">Learn More</a>
       <a href="signup.html">Sign Up</a>
       <a href="report.html">Report Address</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
+
   <main>
     <h1>Sign Up</h1>
     <p class="privacy">
-      We value your privacy. Your personal information will never be shared.  
+      We value your privacy. Your personal information will never be shared.
       When you submit names and addresses of non-tippers, your identity will remain 100% anonymous.
     </p>
 
     <!-- Formspree form -->
     <form id="signupForm" action="https://formspree.io/f/mkgzevrb" method="post" novalidate>
-      <!-- We’ll handle redirect in JS to guarantee it -->
       <input type="hidden" name="_subject" value="New NoTippers signup">
 
       <label for="name">Full Name</label>
@@ -177,6 +171,7 @@
       <div id="err" class="error">Sorry—couldn’t submit. Please try again.</div>
     </form>
   </main>
+
   <footer>© <span id="y"></span> NoTippers</footer>
 
   <script>
@@ -190,7 +185,6 @@
       e.preventDefault();
       err.style.display = 'none';
 
-      // Basic required check (browser will also do this)
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -205,7 +199,6 @@
         });
 
         if (res.ok) {
-          // Guaranteed redirect to our own page
           window.location.href = 'thank-you.html';
         } else {
           err.style.display = 'block';
@@ -215,5 +208,9 @@
       }
     });
   </script>
+
+  <!-- Auth scripts at the very end -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
 </body>
 </html>
