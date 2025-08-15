@@ -17,6 +17,7 @@
     form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
     label { display:block; margin-bottom:6px; font-weight:600; }
     input, select, textarea { width:100%; padding:10px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; font-size:16px; }
+    input[name="zip"]{max-width:200px}
     textarea { resize:vertical; min-height:80px; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .type, .platforms { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:8px 0 16px; }
@@ -28,6 +29,7 @@
     .alert { display:none; padding:10px; border-radius:8px; margin:12px 0; font-size:14px; }
     .ok { background:rgba(81,207,102,.12); border:1px solid rgba(81,207,102,.35); color:#1b5e20; }
     .err { background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35); color:#7a0000; }
+    .gate { display:none; text-align:center; color:#555; font-size:14px; margin-bottom:12px }
     footer { background:#f1f3f5; text-align:center; padding:12px; font-size:14px; color:#555; }
     @media (max-width:680px){ .row { grid-template-columns:1fr; } }
   </style>
@@ -52,24 +54,27 @@
       No names — <strong>addresses only</strong> plus any helpful context (platform, notes, etc.).
     </p>
 
-    <div id="ok" class="alert ok">Thanks — your report was recorded.</div>
-    <div id="err" class="alert err">Sorry, something went wrong. Please try again.</div>
+    <!-- shows only while we check auth -->
+    <div id="gate" class="gate">Checking your login…</div>
 
-    <form id="reportForm" novalidate>
+    <div id="ok" class="alert ok" role="alert">Thanks — your report was recorded.</div>
+    <div id="err" class="alert err" role="alert">Sorry, something went wrong. Please try again.</div>
+
+    <form id="reportForm" novalidate style="display:none">
       <label for="address_line1">Address Line 1</label>
-      <input id="address_line1" name="address_line1" required placeholder="123 Main St">
+      <input id="address_line1" name="address_line1" required placeholder="123 Main St" autocomplete="address-line1">
 
       <label for="address_line2">Address Line 2 (optional)</label>
-      <input id="address_line2" name="address_line2" placeholder="Apt 4B">
+      <input id="address_line2" name="address_line2" placeholder="Apt 4B" autocomplete="address-line2">
 
       <div class="row">
         <div>
           <label for="city">City</label>
-          <input id="city" name="city" required>
+          <input id="city" name="city" required autocomplete="address-level2">
         </div>
         <div>
           <label for="state">State</label>
-          <select id="state" name="state" required>
+          <select id="state" name="state" required autocomplete="address-level1">
             <option value="">Select</option>
             <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
             <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
@@ -89,7 +94,7 @@
       </div>
 
       <label for="zip">ZIP (optional)</label>
-      <input id="zip" name="zip" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?">
+      <input id="zip" name="zip" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" autocomplete="postal-code">
 
       <label>Type</label>
       <div class="type">
@@ -109,7 +114,7 @@
       </div>
 
       <label for="story_url">Story / Video URL (optional)</label>
-      <input id="story_url" name="story_url" type="url" placeholder="https://...">
+      <input id="story_url" name="story_url" type="url" placeholder="https://…">
 
       <label for="notes">Notes (what happened?)</label>
       <textarea id="notes" name="notes" rows="4" placeholder="Keep it factual. No names."></textarea>
@@ -128,7 +133,11 @@
 
   <footer>© <span id="y"></span> NoTippers</footer>
 
+  <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <!-- Shared auth nav/toggle -->
+  <script src="auth.js"></script>
+
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
@@ -138,35 +147,34 @@
 
     const ok = document.getElementById('ok');
     const err = document.getElementById('err');
+    const gate = document.getElementById('gate');
     const form = document.getElementById('reportForm');
     const submitBtn = document.getElementById('submitBtn');
-    const loginLink = document.getElementById('loginLink');
-    const logoutLink = document.getElementById('logoutLink');
 
     function show(el){ el.style.display='block'; }
     function hide(el){ el.style.display='none'; }
 
     // --- Require login to access this page ---
     (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      // Toggle nav login/logout
-      if (session) {
-        loginLink.style.display = 'none';
-        logoutLink.style.display = 'inline-block';
-      } else {
-        const back = encodeURIComponent(location.pathname);
-        window.location.href = `login.html?next=${back}`;
-        return; // stop running the rest until authed
+      // Give Supabase a moment to establish session if just returned from magic link
+      let tries = 0, session = null;
+      while (tries < 10) {
+        const resp = await supabase.auth.getSession();
+        session = resp?.data?.session || null;
+        if (session) break;
+        await new Promise(r => setTimeout(r, 200));
+        tries++;
       }
-    })();
 
-    // Log out handler
-    logoutLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await supabase.auth.signOut();
-      location.href = 'login.html';
-    });
+      if (!session) {
+        const next = encodeURIComponent(location.pathname + location.search);
+        window.location.href = `login.html?next=${next}`;
+        return;
+      }
+      // Authed → show form
+      hide(gate);
+      form.style.display = 'block';
+    })();
 
     // --- Submit handler ---
     form.addEventListener('submit', async (e) => {
@@ -211,7 +219,6 @@
         const { error } = await supabase.from('reports').insert(payload);
         if (error) throw error;
 
-        // Save rate-limit timestamp and redirect
         localStorage.setItem('report_last_submit', String(now));
         form.reset();
         window.location.href = "thank-you-report.html";
