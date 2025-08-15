@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Browse Reports | NoTippers</title>
+  <meta name="description" content="See recent community reports and hotspots to help gig workers earn more and waste less time." />
+  <style>
+    :root{
+      --bg:#0a0b0f; --panel:#0f1117; --muted:#9aa4b2; --text:#e6e9ee; --brand:#0d6efd; --border:#1b1f2a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+    header{position:sticky;top:0;z-index:50;backdrop-filter:saturate(1.2) blur(6px);background:linear-gradient(180deg, rgba(10,11,15,.85), rgba(10,11,15,.55));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px}
+    header .logo{font-weight:800}
+    nav{display:flex;gap:12px;flex-wrap:wrap}
+    nav a{color:#fff;text-decoration:none;font-size:14px;background:rgba(255,255,255,.12);padding:6px 10px;border-radius:8px}
+    nav a:hover{background:rgba(255,255,255,.22)}
+    main{flex:1;max-width:1100px;margin:18px auto;padding:0 16px}
+    h1{margin:8px 0 12px}
+    .tabs{display:flex;gap:8px;margin:8px 0 16px;flex-wrap:wrap}
+    .tab{border:1px solid var(--border);background:#11131a;color:#cfe2ff;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .tab.active{background:var(--brand);color:#fff}
+    .panel{background:#0f1117;border:1px solid var(--border);border-radius:16px;padding:14px}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .filters input,.filters select{background:#11131a;border:1px solid var(--border);color:#e6e9ee;border-radius:8px;padding:10px}
+    table{width:100%;border-collapse:separate;border-spacing:0}
+    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
+    th{color:#cfe2ff}
+    .badge{display:inline-block;border:1px solid var(--border);background:#11131a;color:#9aa4b2;padding:4px 8px;border-radius:999px;font-size:12px}
+    .muted{color:#9aa4b2}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width:860px){.row{grid-template-columns:1fr}}
+    .empty{color:#9aa4b2;text-align:center;padding:24px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">NoTippers</div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="learn-more.html">Learn More</a>
+      <a href="signup.html">Sign Up</a>
+      <a href="report.html">Report Address</a>
+      <a href="browse.html">Browse</a>
+      <a href="login.html" id="loginLink">Log In</a>
+      <a href="#" id="logoutLink" style="display:none">Log Out</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Browse Community Insights</h1>
+    <p class="muted" style="margin-top:-2px">Reviewed reports only. Use these insights to pick better orders.</p>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="latest">Latest reports</button>
+      <button class="tab" data-tab="hotspots">Hotspots (by city)</button>
+    </div>
+
+    <div class="panel" id="panel-latest">
+      <div class="filters">
+        <input id="qCity" placeholder="Filter by city…">
+        <select id="qState">
+          <option value="">All states</option>
+          <!-- quick list -->
+          <option>CA</option><option>NY</option><option>TX</option><option>FL</option><option>IL</option>
+          <option>GA</option><option>PA</option><option>OH</option><option>MI</option><option>NC</option>
+        </select>
+        <select id="qType">
+          <option value="">All types</option>
+          <option value="non_tipper">Non-Tipper</option>
+          <option value="bait_tipper">Bait-Tipper</option>
+        </select>
+        <button id="refreshLatest" class="tab">Refresh</button>
+      </div>
+      <div style="overflow:auto">
+        <table id="tblLatest">
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>City</th><th>State</th><th>ZIP</th><th>Platforms</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-hotspots" style="display:none">
+      <div class="filters">
+        <input id="hCity" placeholder="Filter by city…">
+        <select id="hState">
+          <option value="">All states</option>
+          <option>CA</option><option>NY</option><option>TX</option><option>FL</option><option>IL</option>
+          <option>GA</option><option>PA</option><option>OH</option><option>MI</option><option>NC</option>
+        </select>
+        <button id="refreshHot" class="tab">Refresh</button>
+      </div>
+      <div style="overflow:auto">
+        <table id="tblHot">
+          <thead>
+            <tr>
+              <th>City</th><th>State</th><th>Total</th><th>Non-Tipper</th><th>Bait-Tipper</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="muted" style="margin-top:8px">Counts reflect approved reports only.</p>
+    </div>
+  </main>
+
+  <footer style="border-top:1px solid rgba(255,255,255,.06);text-align:center;padding:16px;color:#9aa4b2">
+    © <span id="y"></span> NoTippers
+  </footer>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Tabs
+    const tabs = document.querySelectorAll('.tab[data-tab]');
+    const panels = { latest: document.getElementById('panel-latest'), hotspots: document.getElementById('panel-hotspots') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const k = t.dataset.tab;
+      Object.keys(panels).forEach(p => panels[p].style.display = (p===k ? 'block' : 'none'));
+    }));
+
+    // Latest reports
+    const tblLatest = document.querySelector('#tblLatest tbody');
+    async function loadLatest(){
+      const city = document.getElementById('qCity').value.trim().toLowerCase();
+      const state = document.getElementById('qState').value.trim();
+      const type  = document.getElementById('qType').value.trim();
+
+      let q = sb.from('reviewed_reports')
+        .select('created_at,type,city,state,zip,platforms')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (city)  q = q.ilike('city', `%${city}%`);
+      if (state) q = q.eq('state', state);
+      if (type)  q = q.eq('type', type);
+
+      const { data, error } = await q;
+      if (error) {
+        tblLatest.innerHTML = `<tr><td colspan="6" class="empty">Error loading data</td></tr>`;
+        return;
+      }
+      if (!data || !data.length) {
+        tblLatest.innerHTML = `<tr><td colspan="6" class="empty">No results</td></tr>`;
+        return;
+      }
+      tblLatest.innerHTML = data.map(r => {
+        const date = new Date(r.created_at).toLocaleString();
+        const plats = Array.isArray(r.platforms) ? r.platforms.join(', ') : '';
+        const t = r.type === 'bait_tipper' ? 'Bait-Tipper' : 'Non-Tipper';
+        return `<tr>
+          <td>${date}</td>
+          <td><span class="badge">${t}</span></td>
+          <td>${r.city || ''}</td>
+          <td>${r.state || ''}</td>
+          <td>${r.zip || ''}</td>
+          <td>${plats}</td>
+        </tr>`;
+      }).join('');
+    }
+    document.getElementById('refreshLatest').addEventListener('click', loadLatest);
+    document.getElementById('qCity').addEventListener('change', loadLatest);
+    document.getElementById('qState').addEventListener('change', loadLatest);
+    document.getElementById('qType').addEventListener('change', loadLatest);
+
+    // Hotspots
+    const tblHot = document.querySelector('#tblHot tbody');
+    async function loadHotspots(){
+      const city = document.getElementById('hCity').value.trim().toLowerCase();
+      const state = document.getElementById('hState').value.trim();
+
+      let q = sb.from('report_counts_by_city').select('*').order('total', { ascending: false }).limit(200);
+      if (city)  q = q.ilike('city', `%${city}%`);
+      if (state) q = q.eq('state', state.toLowerCase());
+
+      const { data, error } = await q;
+      if (error) {
+        tblHot.innerHTML = `<tr><td colspan="5" class="empty">Error loading data</td></tr>`;
+        return;
+      }
+      if (!data || !data.length) {
+        tblHot.innerHTML = `<tr><td colspan="5" class="empty">No results</td></tr>`;
+        return;
+      }
+      tblHot.innerHTML = data.map(r => `
+        <tr>
+          <td>${r.city.toUpperCase()}</td>
+          <td>${r.state.toUpperCase()}</td>
+          <td>${r.total}</td>
+          <td>${r.non_tipper_count}</td>
+          <td>${r.bait_tipper_count}</td>
+        </tr>
+      `).join('');
+    }
+    document.getElementById('refreshHot').addEventListener('click', loadHotspots);
+
+    // Initial loads
+    loadLatest();
+    loadHotspots();
+  </script>
+</body>
+</html>
