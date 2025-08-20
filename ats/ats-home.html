@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Apparel Textile Sourcing — 2025 Shows</title>
+  <meta name="description" content="Apparel Textile Sourcing connects global manufacturers with North American buyers. Join ATS Toronto & Montreal 2025." />
+  <style>
+    :root{
+      --bg:#0b0e13; --ink:#11141a; --text:#e9eef7; --sub:#a9b3c7;
+      --brand:#dd1f26; /* ATS red */
+      --brand2:#0d6efd; /* accent */
+      --ring:rgba(255,255,255,.12);
+      --card:#121722; --card2:#0f141f; --border:#1b2234;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#0b0e13 0%,#0c111a 40%,#0b0e13 100%); color:var(--text);
+    }
+    a{color:inherit}
+
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:50; backdrop-filter:saturate(1.2) blur(8px);
+      background:linear-gradient(180deg, rgba(8,10,14,.85), rgba(8,10,14,.55));
+      border-bottom:1px solid var(--ring); display:flex; align-items:center; justify-content:space-between;
+      padding:10px 18px;
+    }
+    .logo{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.2px}
+    .logo .dot{width:10px; height:10px; border-radius:999px; background:var(--brand)}
+    nav{display:flex; gap:12px; flex-wrap:wrap}
+    nav a{
+      text-decoration:none; font-size:14px; padding:8px 10px; border-radius:10px; color:#fff;
+      background:rgba(255,255,255,.08);
+    }
+    nav a:hover{background:rgba(255,255,255,.16)}
+
+    /* HERO (edge-to-edge crossfade) */
+    .hero{
+      position:relative; overflow:hidden; min-height:60vh;
+      display:grid; place-items:center; text-align:center;
+      border-bottom:1px solid var(--ring);
+    }
+    .slides{
+      position:absolute; inset:0; z-index:0;
+    }
+    .slide{
+      position:absolute; inset:0; background-position:center; background-size:cover; opacity:0;
+      animation: xfade 18s infinite; filter:brightness(.75) contrast(1.05);
+      transform: scale(1.02);
+    }
+    .slide:nth-child(1){ background-image:url('/ats/gallery-1.jpeg'); animation-delay:0s}
+    .slide:nth-child(2){ background-image:url('/ats/gallery-3.jpeg'); animation-delay:6s}
+    .slide:nth-child(3){ background-image:url('/ats/gallery-7.jpeg'); animation-delay:12s}
+    @keyframes xfade{
+      0%{opacity:0} 6%{opacity:1} 28%{opacity:1} 34%{opacity:0} 100%{opacity:0}
+    }
+    .hero-inner{position:relative; z-index:1; padding:36px 16px; max-width:1000px}
+    .eyebrow{display:inline-block; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:#cdd6e9; background:rgba(255,255,255,.12); padding:6px 10px; border-radius:999px}
+    h1{font-size: clamp(28px, 6vw, 52px); margin:10px 0 8px}
+    .sub{color:var(--sub); font-size: clamp(14px, 2.2vw, 18px); margin:0 auto 16px; max-width:70ch}
+    .cta{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+    .btn{
+      display:inline-block; text-decoration:none; font-weight:800; color:#fff;
+      padding:12px 16px; border-radius:12px; background:var(--brand);
+      box-shadow: 0 10px 28px rgba(221,31,38,.35);
+    }
+    .btn.alt{background:var(--brand2); box-shadow:0 10px 28px rgba(13,110,253,.35)}
+    .btn.ghost{background:rgba(255,255,255,.08); box-shadow:none}
+
+    /* Info strip */
+    .strip{
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:1100px; margin:-20px auto 18px; padding:0 16px;
+    }
+    .chip{
+      background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px 14px; text-align:center; color:#cfd7e8
+    }
+    .chip strong{display:block; color:#fff}
+
+    /* Two-show promo cards */
+    .shows{max-width:1100px; margin:24px auto; padding:0 16px; display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); border:1px solid var(--border); border-radius:16px; overflow:hidden;
+      display:grid; grid-template-columns:1.2fr 1fr; min-height:220px;
+    }
+    .card.reverse{grid-template-columns:1fr 1.2fr}
+    .card .img{background-position:center; background-size:cover; filter:brightness(.9)}
+    .card .body{padding:16px}
+    .flag{display:inline-flex; align-items:center; gap:8px; font-size:14px; color:#cfe2ff}
+    .flag i{width:18px; height:12px; background:linear-gradient(0deg,#de2910 0 100%); display:inline-block; position:relative}
+    .flag i::before{content:""; position:absolute; left:2px; top:1px; width:8px; height:8px; background:#ffde00; clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);}
+    .meta{color:#cfd6e3; font-size:14px; margin:6px 0 10px}
+    .body h3{margin:6px 0 6px}
+    .body .cta{justify-content:flex-start}
+
+    /* Value props */
+    .section{max-width:1100px; margin:28px auto; padding:0 16px}
+    .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+    .tile{
+      background:var(--card2); border:1px dashed rgba(255,255,255,.08); border-radius:16px; padding:16px; min-height:140px
+    }
+    .tile h4{margin:2px 0 6px}
+    .tile p{margin:0; color:#c3ccdd}
+
+    /* Photo mosaic */
+    .mosaic{max-width:1100px; margin:10px auto 28px; padding:0 16px; display:grid; gap:10px;
+      grid-template-columns:2fr 1fr 1fr; grid-auto-rows:160px}
+    .mosaic div{border-radius:12px; overflow:hidden; border:1px solid var(--border)}
+    .mosaic .ph{background-position:center; background-size:cover}
+    .mosaic .a{grid-row: span 2}
+    .mosaic .b{grid-column: span 2}
+    .mosaic .c{grid-row: span 2}
+
+    /* News band */
+    .news{
+      max-width:1100px; margin:0 auto 36px; padding:16px; border:1px solid var(--ring); border-radius:16px;
+      background:linear-gradient(90deg, rgba(13,110,253,.2), rgba(221,31,38,.15));
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .news form{display:flex; gap:8px; flex-wrap:wrap}
+    input[type="email"]{padding:10px 12px; border-radius:10px; border:1px solid var(--ring); background:#0e1622; color:#fff; min-width:220px}
+    .small{color:#cbd3e5; font-size:12px}
+
+    footer{border-top:1px solid var(--ring); color:#aab5c9; text-align:center; padding:16px; margin-top:22px}
+
+    /* Mobile tweaks */
+    @media (max-width: 960px){
+      .shows{grid-template-columns:1fr}
+      .card,.card.reverse{grid-template-columns:1fr}
+      .strip{grid-template-columns:1fr; margin-top:8px}
+      .grid-3{grid-template-columns:1fr}
+      .mosaic{grid-template-columns:1fr 1fr; grid-auto-rows:130px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><span class="dot"></span> Apparel Textile Sourcing</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="https://www.appareltextilesourcing.com/attend/">Attend</a>
+      <a href="https://www.appareltextilesourcing.com/exhibit/">Exhibit</a>
+      <a href="https://www.appareltextilesourcing.com/news/">News</a>
+      <a href="https://www.appareltextilesourcing.com/contact/">Contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="slides">
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+    </div>
+    <div class="hero-inner">
+      <span class="eyebrow">North America’s sourcing connection</span>
+      <h1>Two Shows. One Mission.<br/>Connect Buyers with Trusted Manufacturers.</h1>
+      <p class="sub">Meet apparel & textile suppliers, discover new materials and capabilities, and build partnerships that move your business forward.</p>
+      <div class="cta">
+        <a class="btn" href="https://www.appareltextilesourcing.com/attend/">Register to Attend</a>
+        <a class="btn alt" href="https://www.appareltextilesourcing.com/exhibit/">Exhibit & Sponsor</a>
+        <a class="btn ghost" href="https://www.appareltextilesourcing.com/news/">Get Show Updates</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INFO STRIP -->
+  <div class="strip">
+    <div class="chip"><strong>Toronto</strong> Sep 29 – Oct 1, 2025 • The International Centre • 9:30–4:30</div>
+    <div class="chip"><strong>Montreal</strong> Sep 26, 2025 • La Nesra • 9:30–4:30</div>
+    <div class="chip"><strong>Free for Qualified Buyers</strong> Meet vetted suppliers across apparel & textiles</div>
+  </div>
+
+  <!-- TWO SHOW CARDS -->
+  <section class="shows">
+    <article class="card">
+      <div class="img" style="background-image:url('/ats/gallery-8.jpeg')"></div>
+      <div class="body">
+        <div class="flag"><i></i> China-Canada Sourcing Connections</div>
+        <h3>ATS Toronto — Sep 29 – Oct 1, 2025</h3>
+        <p class="meta">The International Centre, Mississauga • 9:30 AM – 4:30 PM</p>
+        <p>Canada’s premier sourcing event for apparel, textiles, and fashion manufacturing. Explore fabrics, trims, private label, and full-package production.</p>
+        <div class="cta">
+          <a class="btn" href="https://www.appareltextilesourcing.com/attend/">Register Free</a>
+          <a class="btn ghost" href="https://www.appareltextilesourcing.com/canada/">Learn More</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="card reverse">
+      <div class="body">
+        <div class="flag"><i></i> China-Canada Sourcing Connections</div>
+        <h3>ATS Montreal — Sep 26, 2025</h3>
+        <p class="meta">La Nesra • 9:30 AM – 4:30 PM</p>
+        <p>A focused, one-day matchmaking experience connecting Québec buyers with high-quality manufacturers from China and beyond.</p>
+        <div class="cta">
+          <a class="btn" href="https://www.appareltextilesourcing.com/attend/">Register Free</a>
+          <a class="btn ghost" href="https://www.appareltextilesourcing.com/montreal-matchmaking/">Learn More</a>
+        </div>
+      </div>
+      <div class="img" style="background-image:url('/ats/gallery-6.jpeg')"></div>
+    </article>
+  </section>
+
+  <!-- VALUE PROPS -->
+  <section class="section">
+    <div class="grid-3">
+      <div class="tile">
+        <h4>Tailored B2B Matchmaking</h4>
+        <p>Meet suppliers by category, MOQ, compliance, and capabilities—curated for your needs.</p>
+      </div>
+      <div class="tile">
+        <h4>Global Supplier Access</h4>
+        <p>Discover apparel, textiles, trims, accessories, and full-package makers under one roof.</p>
+      </div>
+      <div class="tile">
+        <h4>Education & Insights</h4>
+        <p>Seminars and panels covering sourcing, logistics, compliance, and sustainability.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTO MOSAIC -->
+  <section class="mosaic">
+    <div class="ph a" style="background-image:url('/ats/gallery-2.jpeg')"></div>
+    <div class="ph"   style="background-image:url('/ats/gallery-4.jpeg')"></div>
+    <div class="ph"   style="background-image:url('/ats/gallery-5.jpeg')"></div>
+    <div class="ph b" style="background-image:url('/ats/gallery-9.jpeg')"></div>
+    <div class="ph c" style="background-image:url('/ats/gallery-10.jpeg')"></div>
+    <div class="ph"   style="background-image:url('/ats/gallery-11.jpeg')"></div>
+  </section>
+
+  <!-- NEWS / SIGNUP -->
+  <section class="news">
+    <div>
+      <h3 style="margin:0 0 4px">Stay in the loop</h3>
+      <div class="small">Get schedule drops, exhibitor spotlights, and registration updates.</div>
+    </div>
+    <form action="https://formspree.io/f/mkgzevrb" method="POST">
+      <input type="email" name="email" placeholder="you@company.com" required>
+      <button class="btn alt" type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <footer>
+    © <span id="y"></span> Apparel Textile Sourcing
+  </footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
