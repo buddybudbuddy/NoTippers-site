@@ -3,29 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin — Review Reports | NoTippers</title>
+  <title>Admin | NoTippers</title>
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0a0b0f;color:#e6e9ee;display:flex;flex-direction:column;min-height:100vh}
-    header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(10,11,15,.85),rgba(10,11,15,.55));border-bottom:1px solid rgba(255,255,255,.08);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    :root{ --bg:#0a0b0f; --panel:#0f1117; --muted:#9aa4b2; --text:#e6e9ee; --brand:#0d6efd; --border:#1b1f2a; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+    header{position:sticky;top:0;z-index:10;backdrop-filter:saturate(1.2) blur(6px);
+      background:linear-gradient(180deg, rgba(10,11,15,.85), rgba(10,11,15,.55));
+      border-bottom:1px solid rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px}
+    header .logo{font-weight:800}
     header nav{display:flex;gap:12px;flex-wrap:wrap}
-    header nav a{color:#fff;text-decoration:none;background:rgba(255,255,255,.1);padding:6px 10px;border-radius:8px;font-size:14px}
-    header nav a:hover{background:rgba(255,255,255,.18)}
-    main{flex:1;max-width:1100px;margin:0 auto;padding:20px}
-    h1{margin:8px 0 12px}
-    .bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    header nav a{color:#fff;text-decoration:none;font-size:14px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
+    header nav a:hover{background:rgba(255,255,255,.16)}
+    main{flex:1;max-width:1100px;margin:18px auto;padding:0 20px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .controls select,.controls input{background:#0f1117;color:#e6e9ee;border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+    .controls button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 12px;font-weight:700;cursor:pointer}
+    .controls button.ghost{background:rgba(255,255,255,.08)}
+    .panel{background:#0f1117;border:1px solid var(--border);border-radius:16px;padding:14px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+    th{color:#cfe2ff;text-align:left}
+    .tag{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;color:#adb5bd}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .ok{background:#2f9e44}
+    .warn{background:#e03131}
     .muted{color:#9aa4b2}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;margin:10px 0}
-    .row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:center}
-    .row small{display:block;color:#9aa4b2}
-    button{background:#0d6efd;color:#fff;border:0;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
-    button:hover{filter:brightness(1.05)}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,.25)}
-    .notice{display:none;margin:10px 0;padding:10px;border-radius:8px;font-size:14px}
-    .ok{display:none;background:rgba(81,207,102,.12);border:1px solid rgba(81,207,102,.35);color:#c8f7cf}
-    .err{display:none;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);color:#ffdede}
-    .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
-    .tag{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:2px 8px;border-radius:999px;font-size:12px}
-    @media (max-width:900px){ .row{grid-template-columns:1fr 1fr;gap:8px} .row .actions{grid-column:1/-1} }
+    footer{color:#9aa4b2;text-align:center;padding:16px;border-top:1px solid rgba(255,255,255,.06)}
+    @media (max-width:800px){ .hide-mobile{display:none} }
   </style>
 </head>
 <body>
@@ -34,163 +40,200 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="report.html">Report Address</a>
-      <a href="admin.html">Admin</a>
       <a href="login.html" id="loginLink">Log In</a>
       <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
 
   <main>
-    <h1>Review Reports</h1>
-    <div class="bar">
-      <div class="muted">Unreviewed reports (latest first)</div>
-      <div>
-        <button id="refreshBtn" class="ghost">Refresh</button>
-      </div>
+    <h1 style="margin:6px 0 10px">Moderation Queue</h1>
+
+    <div class="controls">
+      <select id="filter">
+        <option value="pending">Pending (not reviewed, not hidden)</option>
+        <option value="reviewed">Reviewed</option>
+        <option value="hidden">Hidden</option>
+        <option value="all">All</option>
+      </select>
+      <input id="search" type="search" placeholder="Search city / state / address…" />
+      <button id="refresh">Refresh</button>
+      <button id="export" class="ghost">Export CSV</button>
+      <span class="muted" id="count"></span>
     </div>
 
-    <div id="msgOk" class="notice ok">Updated.</div>
-    <div id="msgErr" class="notice err">Something went wrong.</div>
-
-    <div id="list"></div>
-
-    <div class="pager">
-      <button id="prevBtn" class="ghost">Prev</button>
-      <span id="pageInfo" class="muted"></span>
-      <button id="nextBtn" class="ghost">Next</button>
+    <div class="panel">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th class="hide-mobile">City/State/ZIP</th>
+            <th>Type / Platforms</th>
+            <th class="hide-mobile">Notes</th>
+            <th>When</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
     </div>
   </main>
 
+  <footer>© <span id="y"></span> NoTippers</footer>
+
+  <!-- Supabase SDK + shared auth -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
   <script>
-    // ---- Config ----
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // --- Supabase client (same keys you already use) ---
     const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const list = document.getElementById('list');
-    const msgOk = document.getElementById('msgOk');
-    const msgErr = document.getElementById('msgErr');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const pageInfo = document.getElementById('pageInfo');
-
-    const PAGE_SIZE = 10;
-    let page = 1;
-    let isAdmin = false;
-
-    function show(el){ el.style.display = 'block'; }
-    function hide(el){ el.style.display = 'none'; }
-
-    // Gate: require admin
+    // Require admin (RLS policy should only allow admins to select/update here)
     (async () => {
-      // Make sure user is logged in
       const { data: { session } } = await sb.auth.getSession();
       if (!session) {
-        const next = encodeURIComponent(location.pathname);
-        window.location.href = `login.html?next=${next}`;
+        location.href = 'login.html?next=' + encodeURIComponent(location.pathname);
         return;
       }
-      // Check admin by querying admins table; RLS will allow only own record, but we just need existence
-      const { data, error } = await sb.from('admins').select('user_id').limit(1);
-      if (error || !data || data.length === 0) {
-        alert('Admin access only.');
-        window.location.href = 'index.html';
-        return;
-      }
-      isAdmin = true;
-      loadPage(1);
+      // Optional: do a quick check your RLS allows only admins to read
+      // If not allowed, the query below will error and we redirect.
+      loadRows();
     })();
 
-    async function loadPage(p) {
-      page = p;
-      list.innerHTML = '<div class="muted">Loading…</div>';
-      hide(msgOk); hide(msgErr);
+    const rowsEl = document.getElementById('rows');
+    const filterEl = document.getElementById('filter');
+    const searchEl = document.getElementById('search');
+    const refreshBtn = document.getElementById('refresh');
+    const exportBtn = document.getElementById('export');
+    const countEl = document.getElementById('count');
 
-      const from = (page - 1) * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
+    filterEl.addEventListener('change', loadRows);
+    searchEl.addEventListener('input', debounce(loadRows, 300));
+    refreshBtn.addEventListener('click', loadRows);
+    exportBtn.addEventListener('click', exportCSV);
 
-      const { data, error } = await sb
-        .from('reports')
-        .select('id, created_at, address_line1, address_line2, city, state, zip, type, platforms, story_url, notes', { count: 'exact' })
-        .eq('is_reviewed', false)
-        .order('created_at', { ascending: false })
-        .range(from, to);
+    async function loadRows(){
+      rowsEl.innerHTML = '<tr><td colspan="6" class="muted">Loading…</td></tr>';
 
-      if (error) {
-        list.innerHTML = '';
-        msgErr.textContent = 'Error loading reports: ' + (error.message || 'unknown');
-        show(msgErr);
-        return;
+      // Build filter
+      const view = filterEl.value;
+      let query = sb.from('reports').select('*').order('created_at', { ascending:false }).limit(200);
+
+      if (view === 'pending') query = query.eq('is_reviewed', false).eq('is_hidden', false);
+      if (view === 'reviewed') query = query.eq('is_reviewed', true);
+      if (view === 'hidden') query = query.eq('is_hidden', true);
+
+      // Basic search (case-insensitive) on a few columns
+      const q = (searchEl.value || '').trim();
+      if (q) {
+        // ilike on multiple columns — simple client side combine
+        const { data, error } = await query;
+        if (error) { handleError(error); return; }
+        const lc = q.toLowerCase();
+        const filtered = (data || []).filter(r =>
+          [r.address_line1, r.city, r.state, r.zip, r.notes].filter(Boolean).join(' ').toLowerCase().includes(lc)
+        );
+        renderRows(filtered);
+      } else {
+        const { data, error } = await query;
+        if (error) { handleError(error); return; }
+        renderRows(data || []);
       }
-
-      pageInfo.textContent = `Page ${page}` + (data?.length < PAGE_SIZE ? ' (end)' : '');
-      renderList(data || []);
     }
 
-    function renderList(items) {
+    function renderRows(items){
+      countEl.textContent = items.length ? `${items.length} records` : '0 records';
       if (!items.length) {
-        list.innerHTML = '<div class="card muted">No unreviewed reports 🎉</div>';
+        rowsEl.innerHTML = '<tr><td colspan="6" class="muted">No records.</td></tr>';
         return;
       }
+      rowsEl.innerHTML = items.map(r => rowHTML(r)).join('');
+      // attach action handlers
+      items.forEach(r => attachRowHandlers(r.id));
+    }
 
-      list.innerHTML = '';
-      items.forEach(r => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <div class="row">
-            <div>
-              <strong>${escapeHtml(r.address_line1)} ${r.address_line2 ? escapeHtml(r.address_line2) : ''}</strong>
-              <small>${escapeHtml(r.city)}, ${escapeHtml(r.state)} ${r.zip ? escapeHtml(r.zip) : ''}</small>
+    function rowHTML(r){
+      const when = new Date(r.created_at).toLocaleString();
+      const platforms = Array.isArray(r.platforms) ? r.platforms.join(', ') : (r.platforms || '');
+      return `
+        <tr id="row-${r.id}">
+          <td>
+            <div><strong>${esc(r.address_line1)}</strong>${r.address_line2 ? ', '+esc(r.address_line2) : ''}</div>
+            <div class="tag">${esc(r.id)}</div>
+          </td>
+          <td class="hide-mobile">${esc(r.city || '')}, ${esc(r.state || '')} ${esc(r.zip || '')}</td>
+          <td>
+            <div class="tag">${esc(r.type)}</div>
+            ${platforms ? `<div class="muted" style="margin-top:4px">${esc(platforms)}</div>` : ''}
+          </td>
+          <td class="hide-mobile">${esc(r.notes || '')}${r.story_url ? `<div><a href="${esc(r.story_url)}" target="_blank" rel="noopener">story/video →</a></div>` : ''}</td>
+            <td>${when}</td>
+          <td>
+            <div class="row-actions">
+              ${!r.is_reviewed && !r.is_hidden ? `<button class="ok" data-act="approve" data-id="${r.id}">Approve</button>` : ''}
+              ${!r.is_hidden ? `<button class="warn" data-act="hide" data-id="${r.id}">Hide</button>` : `<span class="muted">Hidden</span>`}
+              ${r.is_reviewed ? `<span class="muted">Reviewed</span>` : ''}
             </div>
-            <div>
-              <span class="tag">${r.type === 'bait_tipper' ? 'Bait-Tipper' : 'Non-Tipper'}</span>
-              ${Array.isArray(r.platforms) && r.platforms.length ? `<small>${r.platforms.map(escapeHtml).join(', ')}</small>` : ''}
-            </div>
-            <div>
-              ${r.story_url ? `<a href="${escapeAttr(r.story_url)}" target="_blank" rel="noopener">Story/Video</a>` : '<span class="muted">No link</span>'}
-            </div>
-            <div>
-              ${r.notes ? `<small>${escapeHtml(r.notes)}</small>` : '<small class="muted">No notes</small>'}
-            </div>
-            <div class="actions" style="text-align:right">
-              <button data-approve="${r.id}">Approve</button>
-            </div>
-          </div>
-        `;
-        list.appendChild(div);
-      });
+          </td>
+        </tr>
+      `;
+    }
 
-      // Wire up approve buttons
-      list.querySelectorAll('button[data-approve]').forEach(btn => {
+    function attachRowHandlers(id){
+      const row = document.getElementById(`row-${id}`);
+      row.querySelectorAll('button[data-act]').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const id = btn.getAttribute('data-approve');
-          btn.disabled = true; btn.textContent = 'Saving…';
-          const { error } = await sb.from('reports').update({ is_reviewed: true }).eq('id', id);
-          if (error) {
-            btn.disabled = false; btn.textContent = 'Approve';
-            msgErr.textContent = 'Update failed: ' + (error.message || 'unknown');
-            show(msgErr);
-            return;
-          }
-          show(msgOk);
-          // remove row from UI
-          btn.closest('.card').remove();
-          // if list empty, reload next page
-          if (!list.children.length) loadPage(page);
+          const act = btn.getAttribute('data-act');
+          if (act === 'approve') await approve(id);
+          if (act === 'hide') await hideRec(id);
         });
       });
     }
 
-    function escapeHtml(s=''){ return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])) }
-    function escapeAttr(s=''){ return String(s).replace(/"/g, '&quot;') }
+    async function approve(id){
+      const { error } = await sb.from('reports').update({ is_reviewed: true }).eq('id', id);
+      if (error) return handleError(error);
+      // remove row from pending list instantly
+      const tr = document.getElementById(`row-${id}`); if (tr) tr.remove();
+    }
 
-    refreshBtn.addEventListener('click', () => loadPage(page));
-    prevBtn.addEventListener('click', () => { if (page > 1) loadPage(page - 1); });
-    nextBtn.addEventListener('click', () => loadPage(page + 1));
+    async function hideRec(id){
+      if (!confirm('Hide this report from public views?')) return;
+      const { error } = await sb.from('reports').update({ is_hidden: true }).eq('id', id);
+      if (error) return handleError(error);
+      const tr = document.getElementById(`row-${id}`); if (tr) tr.remove();
+    }
+
+    function exportCSV(){
+      const rows = [...document.querySelectorAll('#rows tr')].map(tr => [...tr.children].map(td => td.innerText.replace(/\n/g,' ').trim()));
+      if (!rows.length) return;
+
+      // drop the “Actions” column text
+      const cleaned = rows.map(cols => cols.slice(0, 5));
+      const header = ['Address','City/State/ZIP','Type/Platforms','Notes','When'];
+      const csv = [header, ...cleaned].map(r => r.map(csvEscape).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `reports-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(s){ s = s || ''; if (s.includes(',') || s.includes('"')) return `"${s.replace(/"/g,'""')}"`; return s; }
+    function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function debounce(fn, ms){ let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+    function handleError(err){
+      console.error(err);
+      alert(err?.message || 'Permission error. Make sure RLS allows admins to read/update.');
+      // Optional redirect if not admin:
+      // location.href = 'login.html';
+    }
   </script>
 </body>
 </html>
