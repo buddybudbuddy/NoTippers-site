@@ -18,6 +18,11 @@
     button{background:#0d6efd;color:#fff;border:none;font-weight:700;cursor:pointer}
     button:hover{background:#0b5ed7}
     .msg{font-size:14px;background:#e7f1ff;border:1px solid #b6d4fe;padding:10px;border-radius:8px;display:none}
+    .err{font-size:14px;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35);padding:10px;border-radius:8px;display:none;color:#7a0000;margin-top:-6px}
+    .muted{color:#666;font-size:13px;margin-top:-8px;margin-bottom:12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row a{font-size:13px;color:#0d6efd;text-decoration:none}
+    .row a:hover{text-decoration:underline}
   </style>
 </head>
 <body>
@@ -35,19 +40,32 @@
 
   <main>
     <h1>Log in with a Magic Link</h1>
-    <form id="loginForm">
+
+    <form id="loginForm" novalidate>
       <label for="email">Email</label>
       <input id="email" type="email" required placeholder="you@example.com" autocomplete="email">
+
+      <div class="muted">
+        We’ll email you a one-time link. You’ll be returned to the page you were trying to access.
+      </div>
+
       <button id="sendBtn" type="submit">Send Magic Link</button>
+
       <div id="msg" class="msg">Check your email for the magic link (it might be in spam).</div>
+      <div id="err" class="err"></div>
+
+      <div class="row" style="margin-top:10px">
+        <a href="signup.html">Need an account? Sign up</a>
+      </div>
     </form>
   </main>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    // --- Supabase client (with explicit persistence) ---
+    // --- Supabase client (consistent with auth-complete.html) ---
     const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
+
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
         persistSession: true,
@@ -56,53 +74,74 @@
       }
     });
 
-    // Toggle login/logout in nav
+    // Elements
     const loginLink = document.getElementById('loginLink');
     const logoutLink = document.getElementById('logoutLink');
-    (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        loginLink.style.display = 'none';
-        logoutLink.style.display = 'inline-block';
-      }
-    })();
-    logoutLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await sb.auth.signOut();
-      location.reload();
-    });
-
-    // Magic-link form
     const form = document.getElementById('loginForm');
     const msg = document.getElementById('msg');
+    const errBox = document.getElementById('err');
     const sendBtn = document.getElementById('sendBtn');
+
+    function show(el){ el.style.display = 'block'; }
+    function hide(el){ el.style.display = 'none'; }
+    function showErr(text){
+      errBox.textContent = text;
+      show(errBox);
+    }
 
     // Preserve ?next= so we can return user where they intended
     const params = new URLSearchParams(location.search);
     const next = params.get('next') || '/report.html';
     localStorage.setItem('auth_next', next);
 
+    // Toggle login/logout in nav
+    (async () => {
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) {
+          loginLink.style.display = 'none';
+          logoutLink.style.display = 'inline-block';
+        }
+      } catch (_) {}
+    })();
+
+    logoutLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await sb.auth.signOut();
+        location.reload();
+      } catch (e2) {
+        alert(e2?.message || 'Sign out failed.');
+      }
+    });
+
+    // Submit: send magic link
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hide(msg); hide(errBox);
+
       const email = document.getElementById('email').value.trim();
       if (!email) return;
 
-      // Force the redirect to the WWW origin to avoid session mismatch
-      const REDIRECT_BASE = 'https://www.notippers.com';
-      const redirect = `${REDIRECT_BASE}/auth-complete.html`;
+      // Redirect back to the same host the user is currently on (localhost OR live)
+      // This is correct as long as you whitelisted both in Supabase Auth URL config.
+      const redirect = `${location.origin}/auth-complete.html`;
 
       sendBtn.disabled = true;
       sendBtn.textContent = "Sending…";
+
       try {
         const { error } = await sb.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: redirect }
+          options: {
+            emailRedirectTo: redirect
+          }
         });
         if (error) throw error;
-        msg.style.display = 'block';
-      } catch (err) {
-        console.error(err);
-        alert(err?.message || 'Unable to send the magic link. Please try again.');
+        show(msg);
+      } catch (e2) {
+        console.error(e2);
+        showErr(e2?.message || 'Unable to send the magic link. Please try again.');
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = "Send Magic Link";

@@ -6,8 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signing You In… | NoTippers</title>
   <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0a0b0f;color:#e6e9ee;display:grid;place-items:center;min-height:100vh}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:24px;max-width:520px;text-align:center}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:#0a0b0f;
+      color:#e6e9ee;
+      display:grid;
+      place-items:center;
+      min-height:100vh
+    }
+    .card{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      padding:24px;
+      max-width:520px;
+      text-align:center
+    }
     .muted{color:#9aa4b2}
   </style>
 </head>
@@ -15,39 +30,96 @@
   <div class="card">
     <h1>Signing you in…</h1>
     <p class="muted">Just a moment while we finish your login.</p>
+    <p class="muted" id="status" style="margin-top:10px;"></p>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-    // --- Supabase client (same keys used across the site) ---
+    // --- Supabase client (match settings across the site) ---
     const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    const statusEl = document.getElementById('status');
+    function setStatus(msg){ if (statusEl) statusEl.textContent = msg; }
+
+    function parseHashParams() {
+      const hash = (location.hash || '').replace(/^#/, '');
+      const params = new URLSearchParams(hash);
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      return { access_token, refresh_token };
+    }
+
+    async function waitForSession(maxMs = 8000) {
+      const start = Date.now();
+      while (Date.now() - start < maxMs) {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) return session;
+        await new Promise(r => setTimeout(r, 300));
+      }
+      return null;
+    }
 
     (async () => {
+      const next = localStorage.getItem('auth_next') || '/report.html';
+
       try {
+        setStatus("Finalizing session…");
+
+        // 1) PKCE flow: ?code=...
         const url = new URL(location.href);
         const code = url.searchParams.get('code');
-
-        // If we received a PKCE/email magic-link ?code=, try exchanging it explicitly.
         if (code && typeof sb.auth.exchangeCodeForSession === 'function') {
-          try { await sb.auth.exchangeCodeForSession({ code }); }
-          catch (ex) { console.warn('exchangeCodeForSession failed (will poll getSession):', ex); }
+          try {
+            await sb.auth.exchangeCodeForSession({ code });
+          } catch (e) {
+            console.warn('exchangeCodeForSession failed:', e);
+          }
         }
 
-        // Poll until Supabase finalizes the session (covers hash-based flows too).
-        let tries = 0;
-        while (tries < 20) { // ~6s total
-          const { data: { session } } = await sb.auth.getSession();
-          if (session) break;
-          await new Promise(r => setTimeout(r, 300));
-          tries++;
+        // 2) Hash token flow: #access_token=...&refresh_token=...
+        const { access_token, refresh_token } = parseHashParams();
+        if (access_token && refresh_token && typeof sb.auth.setSession === 'function') {
+          try {
+            await sb.auth.setSession({ access_token, refresh_token });
+          } catch (e) {
+            console.warn('setSession failed:', e);
+          }
         }
+
+        // 3) Wait for Supabase to persist the session
+        const session = await waitForSession(8000);
+
+        // 4) Clean URL (remove ?code and #tokens so refresh doesn't repeat)
+        try {
+          const clean = new URL(location.href);
+          clean.searchParams.delete('code');
+          clean.hash = '';
+          window.history.replaceState({}, document.title, clean.toString());
+        } catch (_) {}
+
+        if (!session) {
+          setStatus("Couldn’t finish login. Sending you back to Log In…");
+          // fall back to login page with next preserved
+          const n = encodeURIComponent(next);
+          setTimeout(() => { window.location.href = `/login.html?next=${n}`; }, 900);
+          return;
+        }
+
+        setStatus("Success! Redirecting…");
+        setTimeout(() => { window.location.href = next; }, 250);
       } catch (e) {
         console.error('Auth completion error:', e);
-      } finally {
-        const next = localStorage.getItem('auth_next') || '/report.html';
-        window.location.href = next;
+        const n = encodeURIComponent(next);
+        window.location.href = `/login.html?next=${n}`;
       }
     })();
   </script>
