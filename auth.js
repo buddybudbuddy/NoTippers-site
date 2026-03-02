@@ -6,9 +6,9 @@
 
 (() => {
   // --- CONFIG ---
-  const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
+  const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
   const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
 
   // --- GUARDS ---
   if (!window.supabase) {

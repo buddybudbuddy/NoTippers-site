@@ -17,7 +17,7 @@
     form { background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
     label { display:block; margin-bottom:6px; font-weight:600; }
     input, select, textarea { width:100%; padding:10px; margin-bottom:16px; border:1px solid #ccc; border-radius:6px; font-size:16px; }
-    input[name="zip"]{max-width:200px}
+    input[name="zip"]{max-width:220px}
     textarea { resize:vertical; min-height:80px; }
     .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .type, .platforms { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin:8px 0 16px; }
@@ -29,9 +29,37 @@
     .alert { display:none; padding:10px; border-radius:8px; margin:12px 0; font-size:14px; }
     .ok { background:rgba(81,207,102,.12); border:1px solid rgba(81,207,102,.35); color:#1b5e20; }
     .err { background:rgba(255,107,107,.12); border:1px solid rgba(255,107,107,.35); color:#7a0000; }
-    .gate { display:none; text-align:center; color:#555; font-size:14px; margin-bottom:12px }
+    .gate { display:block; text-align:center; color:#555; font-size:14px; margin-bottom:12px }
+    .small { font-size:12px; color:#555; margin-top:-10px; margin-bottom:14px; }
+    .warn { background:#fff3cd; border:1px solid #ffe69c; color:#664d03; padding:10px; border-radius:8px; margin:12px 0; font-size:13px; display:none; }
     footer { background:#f1f3f5; text-align:center; padding:12px; font-size:14px; color:#555; }
     @media (max-width:680px){ .row { grid-template-columns:1fr; } }
+
+    /* --- Mapbox autocomplete dropdown --- */
+    .addressWrap { position: relative; }
+    .acBox {
+      position:absolute;
+      top: 100%;
+      left:0;
+      right:0;
+      background:#fff;
+      border:1px solid #d0d7de;
+      border-top:0;
+      border-radius:0 0 10px 10px;
+      box-shadow:0 10px 24px rgba(0,0,0,.12);
+      max-height:260px;
+      overflow:auto;
+      z-index:1000;
+      display:none;
+    }
+    .acItem{
+      padding:10px 12px;
+      cursor:pointer;
+      font-size:14px;
+      border-top:1px solid rgba(0,0,0,.06);
+    }
+    .acItem:hover{ background:#f3f7ff; }
+    .acHint { font-size:12px; color:#555; margin-top:-10px; margin-bottom:14px; }
   </style>
 
   <!-- Cloudflare Turnstile -->
@@ -43,37 +71,51 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="learn-more.html">Learn More</a>
+      <a href="browse.html">Browse</a>
+      <a href="report.html">Report</a>
       <a href="signup.html">Sign Up</a>
-      <a href="report.html">Report Address</a>
       <a href="login.html" id="loginLink">Log In</a>
       <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
   </header>
 
   <main>
-    <h1>Report a Non-Tipper / Bait-Tipper</h1>
+    <h1>Report an Address (Private)</h1>
+
     <p class="notice">
-      Your identity remains <strong>100% anonymous</strong>. Please share accurate info only.
-      No names — <strong>addresses only</strong> plus any helpful context (platform, notes, etc.).
+      Your identity remains <strong>100% anonymous</strong>.
+      We accept exact addresses, but we <strong>do not display addresses</strong>.
+      We store a one-way hash so the site can answer “this area is known for tips / not known to tip / mixed reviews”
+      without doxxing anyone. This tool is not for harassment or intimidation — accounts abusing it will be banned.
     </p>
 
-    <!-- shows only while we check auth -->
+    <div id="localDevWarn" class="warn">
+      Dev mode: Turnstile is skipped on <strong>localhost</strong> so you can test submissions.
+      Production will still require Turnstile.
+    </div>
+
     <div id="gate" class="gate">Checking your login…</div>
 
-    <div id="ok" class="alert ok" role="alert">Thanks — your report was recorded.</div>
+    <div id="ok" class="alert ok" role="alert">Thanks — your report was recorded and will be reviewed.</div>
     <div id="err" class="alert err" role="alert">Sorry, something went wrong. Please try again.</div>
 
     <form id="reportForm" novalidate style="display:none">
-      <label for="address_line1">Address Line 1</label>
-      <input id="address_line1" name="address_line1" required placeholder="123 Main St" autocomplete="address-line1">
+      <label for="address">Address (kept private)</label>
 
-      <label for="address_line2">Address Line 2 (optional)</label>
-      <input id="address_line2" name="address_line2" placeholder="Apt 4B" autocomplete="address-line2">
+      <!-- Mapbox autocomplete wrapper -->
+      <div class="addressWrap">
+        <input id="address" name="address" required placeholder="123 Main St, Apt 4B" autocomplete="street-address">
+        <div id="acBox" class="acBox" role="listbox" aria-label="Address suggestions"></div>
+      </div>
+
+      <div class="acHint">
+        Tip: You can type manually, or pick a suggestion. We never show exact addresses publicly.
+      </div>
 
       <div class="row">
         <div>
           <label for="city">City</label>
-          <input id="city" name="city" required autocomplete="address-level2">
+          <input id="city" name="city" required placeholder="Phoenix" autocomplete="address-level2">
         </div>
         <div>
           <label for="state">State</label>
@@ -97,38 +139,34 @@
       </div>
 
       <label for="zip">ZIP (optional)</label>
-      <input id="zip" name="zip" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" autocomplete="postal-code">
+      <input id="zip" name="zip" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" placeholder="85001" autocomplete="postal-code">
 
-      <label>Type</label>
+      <label>Area Signal</label>
       <div class="type">
-        <label class="checkbox"><input type="radio" name="type" value="non_tipper" required> Non-Tipper</label>
-        <label class="checkbox"><input type="radio" name="type" value="bait_tipper" required> Bait-Tipper</label>
+        <label class="checkbox"><input type="radio" name="type" value="tips" required> This area is known for tips</label>
+        <label class="checkbox"><input type="radio" name="type" value="no_tips" required> This area is known not to tip</label>
       </div>
 
       <label>Delivery Platforms (choose any)</label>
       <div class="platforms">
         <label class="checkbox"><input type="checkbox" name="platforms" value="DoorDash"> DoorDash</label>
         <label class="checkbox"><input type="checkbox" name="platforms" value="Uber"> Uber</label>
-        <label class="checkbox"><input type="checkbox" name="platforms" value="Lyft"> Lyft</label>
         <label class="checkbox"><input type="checkbox" name="platforms" value="Instacart"> Instacart</label>
         <label class="checkbox"><input type="checkbox" name="platforms" value="Shipt"> Shipt</label>
         <label class="checkbox"><input type="checkbox" name="platforms" value="Grubhub"> Grubhub</label>
         <label class="checkbox"><input type="checkbox" name="platforms" value="Other"> Other</label>
       </div>
 
-      <label for="story_url">Story / Video URL (optional)</label>
-      <input id="story_url" name="story_url" type="url" placeholder="https://…">
-
-      <label for="notes">Notes (what happened?)</label>
-      <textarea id="notes" name="notes" rows="4" placeholder="Keep it factual. No names."></textarea>
+      <label for="notes">Notes (optional)</label>
+      <textarea id="notes" name="notes" rows="4" placeholder="Keep it factual. No names. No threats."></textarea>
 
       <!-- Honeypot -->
       <input type="text" name="_gotcha" style="display:none">
-      <!-- Client-side rate limit -->
-      <input type="hidden" id="lastSubmitTs" value="">
 
-      <!-- ✅ Turnstile widget (your Site Key) -->
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAABsALAJqBrXoFfV7" data-theme="light"></div>
+      <!-- Turnstile widget -->
+      <div id="turnstileWrap">
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAABsALAJqBrXoFfV7" data-theme="light"></div>
+      </div>
 
       <div class="actions">
         <button id="submitBtn" type="submit">Submit Report</button>
@@ -139,49 +177,82 @@
 
   <footer>© <span id="y"></span> NoTippers</footer>
 
-  <!-- Supabase SDK -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <!-- Shared auth nav/toggle -->
   <script src="auth.js"></script>
+
+  <!-- ✅ NEW: load local config AFTER auth.js and BEFORE our script -->
+  <script src="config.js"></script>
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Supabase from env (inlined here; we’ll move to env-only soon)
-    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // =========================
+    // Config (token comes from config.js)
+    // =========================
+    const MAPBOX_TOKEN = window.NOTIPPERS_CONFIG?.MAPBOX_TOKEN || "";
 
+    // IMPORTANT: avoid global name collision with auth.js
+    const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
+    const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const IS_LOCAL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
+    // =========================
+    // Elements
+    // =========================
     const ok = document.getElementById('ok');
     const err = document.getElementById('err');
     const gate = document.getElementById('gate');
     const form = document.getElementById('reportForm');
     const submitBtn = document.getElementById('submitBtn');
+    const localDevWarn = document.getElementById('localDevWarn');
+
+    const addressInput = document.getElementById('address');
+    const cityInput = document.getElementById('city');
+    const stateSelect = document.getElementById('state');
+    const zipInput = document.getElementById('zip');
+    const acBox = document.getElementById('acBox');
 
     function show(el){ el.style.display='block'; }
     function hide(el){ el.style.display='none'; }
 
-    // Require login
+    // =========================
+    // Auth gate
+    // =========================
     (async () => {
-      let tries = 0, session = null;
-      while (tries < 10) {
-        const resp = await supabase.auth.getSession();
-        session = resp?.data?.session || null;
-        if (session) break;
-        await new Promise(r => setTimeout(r, 200));
-        tries++;
+      try {
+        const resp = await sbClient.auth.getSession();
+        const session = resp?.data?.session || null;
+        if (!session) {
+          const next = encodeURIComponent(location.pathname + location.search);
+          window.location.href = `login.html?next=${next}`;
+          return;
+        }
+
+        hide(gate);
+        form.style.display = 'block';
+
+        if (IS_LOCAL) {
+          show(localDevWarn);
+        }
+
+        // If token missing, just disable autocomplete silently (manual still works)
+        if (!MAPBOX_TOKEN) {
+          console.warn("Mapbox token missing. Autocomplete disabled (manual entry still works).");
+        }
+      } catch (e) {
+        err.textContent = "Login check failed. Please refresh.";
+        show(err);
       }
-      if (!session) {
-        const next = encodeURIComponent(location.pathname + location.search);
-        window.location.href = `login.html?next=${next}`;
-        return;
-      }
-      hide(gate);
-      form.style.display = 'block';
     })();
 
-    // Verify Turnstile with our serverless API
+    // =========================
+    // Turnstile verify
+    // =========================
     async function verifyTurnstileToken(formEl) {
+      if (IS_LOCAL) return { ok:true, skipped:true };
+
       const token = formEl['cf-turnstile-response']?.value || '';
       if (!token) return { ok:false, reason:'missing token' };
 
@@ -190,34 +261,143 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token })
       });
+
       if (!res.ok) return { ok:false, reason:'endpoint error' };
       const data = await res.json();
       return { ok: !!data.success, reason: data.error || null };
     }
 
-    // Submit handler
+    // =========================
+    // Hash helpers
+    // =========================
+    async function sha256Hex(str) {
+      const enc = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+    function norm(s){ return (s || '').toLowerCase().replace(/\s+/g,' ').trim(); }
+
+    // =========================
+    // Mapbox Autocomplete (OPTIONAL, never required)
+    // Fixes:
+    //  - keep house number (uses feature.address + feature.text)
+    //  - manual typing always allowed
+    // =========================
+    let acAbort = null;
+    let lastQuery = '';
+    let acItems = [];
+
+    function closeAc(){ acBox.style.display = 'none'; acBox.innerHTML = ''; acItems = []; }
+    function openAc(){ acBox.style.display = 'block'; }
+
+    function pickFeature(feature){
+      // ✅ KEEP house number
+      const streetLine = feature.address ? `${feature.address} ${feature.text}` : feature.text;
+      if (streetLine) addressInput.value = streetLine;
+
+      // Fill city/state/zip from context if present
+      const ctx = feature.context || [];
+      const cityObj  = ctx.find(c => (c.id || '').includes('place'));
+      const stateObj = ctx.find(c => (c.id || '').includes('region'));
+      const zipObj   = ctx.find(c => (c.id || '').includes('postcode'));
+
+      if (cityObj?.text) cityInput.value = cityObj.text;
+
+      if (stateObj?.short_code) {
+        // short_code like "us-ca" => "CA"
+        const abbr = stateObj.short_code.split('-')[1]?.toUpperCase();
+        if (abbr) stateSelect.value = abbr;
+      }
+
+      if (zipObj?.text) zipInput.value = zipObj.text;
+
+      closeAc();
+    }
+
+    async function fetchMapboxSuggestions(q){
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
+        `?access_token=${encodeURIComponent(MAPBOX_TOKEN)}` +
+        `&autocomplete=true&country=us&types=address&limit=6`;
+
+      if (acAbort) acAbort.abort();
+      acAbort = new AbortController();
+
+      const res = await fetch(url, { signal: acAbort.signal });
+      if (!res.ok) throw new Error('Mapbox error');
+      const data = await res.json();
+      return data.features || [];
+    }
+
+    addressInput.addEventListener('input', async () => {
+      // If no token, just don't attempt autocomplete
+      if (!MAPBOX_TOKEN) { closeAc(); return; }
+
+      const q = addressInput.value.trim();
+      lastQuery = q;
+
+      if (q.length < 3) { closeAc(); return; }
+
+      try {
+        const features = await fetchMapboxSuggestions(q);
+        if (addressInput.value.trim() !== lastQuery) return;
+
+        acItems = features;
+        if (!features.length) { closeAc(); return; }
+
+        acBox.innerHTML = features.map((f, idx) => {
+          const label = f.place_name || (f.text || '');
+          return `<div class="acItem" data-idx="${idx}">${label}</div>`;
+        }).join('');
+
+        openAc();
+      } catch (e) {
+        closeAc();
+      }
+    });
+
+    acBox.addEventListener('click', (e) => {
+      const item = e.target.closest('.acItem');
+      if (!item) return;
+      const idx = Number(item.dataset.idx);
+      const feature = acItems[idx];
+      if (feature) pickFeature(feature);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.addressWrap')) closeAc();
+    });
+
+    // =========================
+    // Submit
+    // =========================
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hide(ok); hide(err);
 
-      // 15s client-side rate limit
+      // basic client-side rate limit
       const now = Date.now();
       const last = Number(localStorage.getItem('report_last_submit') || 0);
       if (now - last < 15000) {
         err.textContent = "Please wait a few seconds before submitting again.";
-        show(err); return;
+        show(err);
+        return;
       }
 
-      const address_line1 = form.address_line1.value.trim();
-      const city = form.city.value.trim();
-      const state = form.state.value.trim();
+      // Honeypot
+      if (form._gotcha.value) return;
+
+      const address = addressInput.value.trim();
+      const city = cityInput.value.trim();
+      const state = stateSelect.value.trim();
+      const zip = zipInput.value.trim() || null;
       const type = (new FormData(form)).get('type');
-      if (!address_line1 || !city || !state || !type) {
-        err.textContent = "Please fill in Address, City, State, and Type.";
-        show(err); return;
+
+      if (!address || !city || !state || !type) {
+        err.textContent = "Please fill in Address, City, State, and Area Signal.";
+        show(err);
+        return;
       }
 
-      // ✅ require Turnstile pass
       const verified = await verifyTurnstileToken(form);
       if (!verified.ok) {
         err.textContent = "Please complete the anti-spam check and try again.";
@@ -225,33 +405,43 @@
         return;
       }
 
-      const platforms = Array.from(document.querySelectorAll('input[name="platforms"]:checked')).map(cb => cb.value);
+      const platforms = Array.from(document.querySelectorAll('input[name="platforms"]:checked'))
+        .map(cb => cb.value);
+
+      const normalizedAddress = `${norm(address)}|${norm(city)}|${norm(state)}|${(zip || '').trim()}`;
+      const address_hash = await sha256Hex(normalizedAddress);
+
+      const area_key = `${norm(city)}|${norm(state)}|${(zip || '').trim()}`;
 
       const payload = {
-        address_line1,
-        address_line2: form.address_line2.value.trim() || null,
         city,
         state,
-        zip: form.zip.value.trim() || null,
+        zip,
         type,
-        platforms,
-        notes: form.notes.value.trim() || null,
-        story_url: form.story_url.value.trim() || null
+        platforms: platforms.length ? platforms : null,
+        notes: (form.notes.value || '').trim() || null,
+        reviewed: false,
+        area_key,
+        address_hash
       };
 
-      submitBtn.disabled = true; submitBtn.textContent = "Submitting…";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+
       try {
-        const { error } = await supabase.from('reports').insert(payload);
+        const { error } = await sbClient.from('reports').insert(payload);
         if (error) throw error;
 
         localStorage.setItem('report_last_submit', String(now));
         form.reset();
+        closeAc();
         window.location.href = "thank-you-report.html";
-      } catch (e) {
-        err.textContent = "Error: " + (e.message || "unable to submit");
+      } catch (e2) {
+        err.textContent = "Error: " + (e2.message || "unable to submit");
         show(err);
       } finally {
-        submitBtn.disabled = false; submitBtn.textContent = "Submit Report";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Report";
       }
     });
   </script>

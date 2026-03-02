@@ -22,8 +22,10 @@
     .tab{border:1px solid var(--border);background:#11131a;color:#cfe2ff;padding:8px 12px;border-radius:10px;cursor:pointer}
     .tab.active{background:var(--brand);color:#fff}
     .panel{background:#0f1117;border:1px solid var(--border);border-radius:16px;padding:14px}
-    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
     .filters input,.filters select{background:#11131a;border:1px solid var(--border);color:#e6e9ee;border-radius:8px;padding:10px}
+    .filters button{border:1px solid var(--border);background:#11131a;color:#cfe2ff;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .filters button:hover{background:#141826}
     table{width:100%;border-collapse:separate;border-spacing:0}
     th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px}
     th{color:#cfe2ff}
@@ -32,6 +34,12 @@
     .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width:860px){.row{grid-template-columns:1fr}}
     .empty{color:#9aa4b2;text-align:center;padding:24px}
+    .card{border:1px solid var(--border);background:#11131a;border-radius:14px;padding:14px}
+    .ok{border:1px solid rgba(81,207,102,.35);background:rgba(81,207,102,.10);color:#bff3c8}
+    .warn{border:1px solid rgba(255,193,7,.35);background:rgba(255,193,7,.10);color:#ffe8a3}
+    .err{border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.10);color:#ffb2b2}
+    .big{font-size:18px;font-weight:800}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
   </style>
 </head>
 <body>
@@ -55,14 +63,15 @@
     <div class="tabs">
       <button class="tab active" data-tab="latest">Latest reports</button>
       <button class="tab" data-tab="hotspots">Hotspots (by city)</button>
+      <button class="tab" data-tab="lookup">Address lookup</button>
     </div>
 
+    <!-- LATEST -->
     <div class="panel" id="panel-latest">
       <div class="filters">
         <input id="qCity" placeholder="Filter by city…">
         <select id="qState">
           <option value="">All states</option>
-          <!-- quick list -->
           <option>CA</option><option>NY</option><option>TX</option><option>FL</option><option>IL</option>
           <option>GA</option><option>PA</option><option>OH</option><option>MI</option><option>NC</option>
         </select>
@@ -70,8 +79,10 @@
           <option value="">All types</option>
           <option value="non_tipper">Non-Tipper</option>
           <option value="bait_tipper">Bait-Tipper</option>
+          <option value="tips">Known for tips</option>
+          <option value="no_tips">Known not to tip</option>
         </select>
-        <button id="refreshLatest" class="tab">Refresh</button>
+        <button id="refreshLatest">Refresh</button>
       </div>
       <div style="overflow:auto">
         <table id="tblLatest">
@@ -85,6 +96,7 @@
       </div>
     </div>
 
+    <!-- HOTSPOTS -->
     <div class="panel" id="panel-hotspots" style="display:none">
       <div class="filters">
         <input id="hCity" placeholder="Filter by city…">
@@ -93,7 +105,7 @@
           <option>CA</option><option>NY</option><option>TX</option><option>FL</option><option>IL</option>
           <option>GA</option><option>PA</option><option>OH</option><option>MI</option><option>NC</option>
         </select>
-        <button id="refreshHot" class="tab">Refresh</button>
+        <button id="refreshHot">Refresh</button>
       </div>
       <div style="overflow:auto">
         <table id="tblHot">
@@ -107,6 +119,68 @@
       </div>
       <p class="muted" style="margin-top:8px">Counts reflect approved reports only.</p>
     </div>
+
+    <!-- LOOKUP -->
+    <div class="panel" id="panel-lookup" style="display:none">
+      <div class="card">
+        <div class="big">Check an address (privacy-safe)</div>
+        <p class="muted" style="margin-top:6px">
+          Enter the same parts you reported: address + city + state + (optional) ZIP.
+          We hash it locally and only look up aggregated community signals. Exact addresses are never shown.
+        </p>
+
+        <!-- NEW: mission / responsible use copy -->
+        <p class="muted" style="margin-top:6px; line-height:1.35">
+          <strong>Community goal:</strong> help gig workers make better choices and increase their bottom line.
+          Use these tools responsibly — no harassment, no intimidation, and no personal info.
+          We never display exact addresses; we only show privacy-safe community signals to help you maximize your time and earnings.
+        </p>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label class="muted" for="lAddress">Address</label>
+            <input id="lAddress" placeholder="123 Main St, Apt 4B" style="width:100%">
+          </div>
+          <div>
+            <label class="muted" for="lCity">City</label>
+            <input id="lCity" placeholder="Phoenix" style="width:100%">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label class="muted" for="lState">State</label>
+            <select id="lState" style="width:100%">
+              <option value="">Select</option>
+              <option>AL</option><option>AK</option><option>AZ</option><option>AR</option>
+              <option>CA</option><option>CO</option><option>CT</option><option>DE</option>
+              <option>FL</option><option>GA</option><option>HI</option><option>ID</option>
+              <option>IL</option><option>IN</option><option>IA</option><option>KS</option>
+              <option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+              <option>MA</option><option>MI</option><option>MN</option><option>MS</option>
+              <option>MO</option><option>MT</option><option>NE</option><option>NV</option>
+              <option>NH</option><option>NJ</option><option>NM</option><option>NY</option>
+              <option>NC</option><option>ND</option><option>OH</option><option>OK</option>
+              <option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+              <option>SD</option><option>TN</option><option>TX</option><option>UT</option>
+              <option>VT</option><option>VA</option><option>WA</option><option>WV</option>
+              <option>WI</option><option>WY</option>
+            </select>
+          </div>
+          <div>
+            <label class="muted" for="lZip">ZIP (optional)</label>
+            <input id="lZip" placeholder="85001" style="width:100%">
+          </div>
+        </div>
+
+        <div class="filters" style="margin-top:12px">
+          <button id="lookupBtn">Check</button>
+          <button id="lookupClearBtn">Clear</button>
+        </div>
+
+        <div id="lookupResult" style="margin-top:12px"></div>
+      </div>
+    </div>
   </main>
 
   <footer style="border-top:1px solid rgba(255,255,255,.06);text-align:center;padding:16px;color:#9aa4b2">
@@ -118,13 +192,17 @@
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    const SUPABASE_URL = "https://sruwewdifhinkviqibjv.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNydXdld2RpZmhpbmt2aXFpYmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMTM1NzIsImV4cCI6MjA3MDc4OTU3Mn0.p2UHsx4ejit75hoBKt7XeoaQIL6NEhzNDv-N0IBib-s";
+    const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Tabs
     const tabs = document.querySelectorAll('.tab[data-tab]');
-    const panels = { latest: document.getElementById('panel-latest'), hotspots: document.getElementById('panel-hotspots') };
+    const panels = {
+      latest: document.getElementById('panel-latest'),
+      hotspots: document.getElementById('panel-hotspots'),
+      lookup: document.getElementById('panel-lookup'),
+    };
     tabs.forEach(t => t.addEventListener('click', () => {
       tabs.forEach(x => x.classList.remove('active'));
       t.classList.add('active');
@@ -132,7 +210,7 @@
       Object.keys(panels).forEach(p => panels[p].style.display = (p===k ? 'block' : 'none'));
     }));
 
-    // Latest reports
+    // ---------- Latest reports ----------
     const tblLatest = document.querySelector('#tblLatest tbody');
     async function loadLatest(){
       const city = document.getElementById('qCity').value.trim().toLowerCase();
@@ -159,15 +237,21 @@
       }
       tblLatest.innerHTML = data.map(r => {
         const date = new Date(r.created_at).toLocaleString();
-        const plats = Array.isArray(r.platforms) ? r.platforms.join(', ') : '';
-        const t = r.type === 'bait_tipper' ? 'Bait-Tipper' : 'Non-Tipper';
+        const plats = Array.isArray(r.platforms) ? r.platforms.join(', ') : (r.platforms || '');
+        const label =
+          r.type === 'bait_tipper' ? 'Bait-Tipper' :
+          r.type === 'non_tipper' ? 'Non-Tipper' :
+          r.type === 'tips' ? 'Known for tips' :
+          r.type === 'no_tips' ? 'Known not to tip' :
+          r.type;
+
         return `<tr>
           <td>${date}</td>
-          <td><span class="badge">${t}</span></td>
+          <td><span class="badge">${label}</span></td>
           <td>${r.city || ''}</td>
-          <td>${r.state || ''}</td>
+          <td>${(r.state || '').toUpperCase()}</td>
           <td>${r.zip || ''}</td>
-          <td>${plats}</td>
+          <td>${plats || ''}</td>
         </tr>`;
       }).join('');
     }
@@ -176,15 +260,19 @@
     document.getElementById('qState').addEventListener('change', loadLatest);
     document.getElementById('qType').addEventListener('change', loadLatest);
 
-    // Hotspots
+    // ---------- Hotspots ----------
     const tblHot = document.querySelector('#tblHot tbody');
     async function loadHotspots(){
       const city = document.getElementById('hCity').value.trim().toLowerCase();
       const state = document.getElementById('hState').value.trim();
 
-      let q = sb.from('report_counts_by_city').select('*').order('total', { ascending: false }).limit(200);
+      let q = sb.from('report_counts_by_city')
+        .select('*')
+        .order('total', { ascending: false })
+        .limit(200);
+
       if (city)  q = q.ilike('city', `%${city}%`);
-      if (state) q = q.eq('state', state.toLowerCase());
+      if (state) q = q.eq('state', state); // IMPORTANT: do not lower-case state
 
       const { data, error } = await q;
       if (error) {
@@ -197,15 +285,150 @@
       }
       tblHot.innerHTML = data.map(r => `
         <tr>
-          <td>${r.city.toUpperCase()}</td>
-          <td>${r.state.toUpperCase()}</td>
-          <td>${r.total}</td>
-          <td>${r.non_tipper_count}</td>
-          <td>${r.bait_tipper_count}</td>
+          <td>${(r.city || '').toUpperCase()}</td>
+          <td>${(r.state || '').toUpperCase()}</td>
+          <td>${r.total ?? ''}</td>
+          <td>${r.non_tipper_count ?? ''}</td>
+          <td>${r.bait_tipper_count ?? ''}</td>
         </tr>
       `).join('');
     }
     document.getElementById('refreshHot').addEventListener('click', loadHotspots);
+
+    // ---------- Address lookup ----------
+    const lAddress = document.getElementById('lAddress');
+    const lCity = document.getElementById('lCity');
+    const lState = document.getElementById('lState');
+    const lZip = document.getElementById('lZip');
+    const lookupBtn = document.getElementById('lookupBtn');
+    const lookupClearBtn = document.getElementById('lookupClearBtn');
+    const lookupResult = document.getElementById('lookupResult');
+
+    function normalize(s){
+      return (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    async function sha256Hex(str) {
+      const enc = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function verdictFromCounts(tips, noTips){
+      tips = Number(tips || 0);
+      noTips = Number(noTips || 0);
+      if (tips > 0 && noTips > 0) return { kind:'warn', title:'Mixed reviews', text:'This area has mixed community reviews (both tipping and not tipping reports).' };
+      if (tips > 0) return { kind:'ok', title:'Known for tips', text:'This area is known for tips.' };
+      if (noTips > 0) return { kind:'err', title:'Known not to tip', text:'This area is known not to tip.' };
+      return null;
+    }
+
+    // IMPORTANT: This render function intentionally does NOT reveal whether the match was "exact" vs "fallback"
+    function renderResultCard(row){
+      const verdict = verdictFromCounts(row.tips_count, row.no_tips_count);
+      if (!verdict) {
+        lookupResult.innerHTML = `<div class="card"><div class="muted">No reviewed data found.</div></div>`;
+        return;
+      }
+
+      const cls = verdict.kind === 'ok' ? 'ok' : verdict.kind === 'warn' ? 'warn' : 'err';
+      const last = row.last_reported_at ? new Date(row.last_reported_at).toLocaleString() : '—';
+
+      const cityDisp = row.city || '';
+      const stateDisp = (row.state || '').toUpperCase();
+      const zipDisp = (row.zip || '').trim();
+
+      lookupResult.innerHTML = `
+        <div class="card ${cls}">
+          <div class="big">${verdict.title}</div>
+          <div style="margin-top:6px">${verdict.text}</div>
+
+          <div class="muted" style="margin-top:10px">
+            Addresses are never displayed. This is a privacy-safe community signal.
+          </div>
+
+          <div class="muted" style="margin-top:10px">
+            <strong>Area:</strong> ${cityDisp}${cityDisp && stateDisp ? ', ' : ''}${stateDisp}${zipDisp ? ` ${zipDisp}` : ''}<br>
+            <strong>Reports:</strong> ${row.total || 0} (tips: ${row.tips_count || 0}, no tip: ${row.no_tips_count || 0})<br>
+            <strong>Last reviewed report:</strong> ${last}
+          </div>
+        </div>
+      `;
+    }
+
+    async function doLookup(){
+      lookupResult.innerHTML = `<div class="card"><div class="muted">Checking…</div></div>`;
+
+      const address = normalize(lAddress.value);
+      const city = normalize(lCity.value);
+      const state = normalize(lState.value);
+      const zip = (lZip.value || '').trim();
+
+      if (!address || !city || !state) {
+        lookupResult.innerHTML = `<div class="card err"><div class="big">Missing info</div><div style="margin-top:6px">Please enter address, city, and state.</div></div>`;
+        return;
+      }
+
+      const addressKey = `${address}|${city}|${state}|${zip}`;
+      const address_hash = await sha256Hex(addressKey);
+      const area_key = `${city}|${state}|${zip}`;
+
+      // Try an address-hash summary first (best fidelity),
+      // but we NEVER disclose whether it matched by hash vs area fallback.
+      {
+        const { data, error } = await sb
+          .from('reviewed_address_summary')
+          .select('address_hash,area_key,city,state,zip,total,tips_count,no_tips_count,last_reported_at')
+          .eq('address_hash', address_hash)
+          .limit(1);
+
+        if (!error && data && data.length) {
+          renderResultCard(data[0]);
+          return;
+        }
+      }
+
+      // Fallback to area summary (still privacy-safe + useful)
+      {
+        const { data, error } = await sb
+          .from('reviewed_area_summary')
+          .select('area_key,city,state,zip,total,tips_count,no_tips_count,last_reported_at')
+          .eq('area_key', area_key)
+          .limit(1);
+
+        if (error) {
+          lookupResult.innerHTML = `
+            <div class="card err">
+              <div class="big">Error</div>
+              <div style="margin-top:6px">Could not load lookup data.</div>
+              <div class="muted mono" style="margin-top:8px">${error.message || ''}</div>
+            </div>`;
+          return;
+        }
+
+        if (data && data.length) {
+          renderResultCard(data[0]);
+          return;
+        }
+      }
+
+      lookupResult.innerHTML = `
+        <div class="card">
+          <div class="big">No reviewed data found</div>
+          <div class="muted" style="margin-top:6px">
+            If this address was just reported, it won’t appear until it’s reviewed/approved.
+          </div>
+        </div>`;
+    }
+
+    lookupBtn.addEventListener('click', doLookup);
+    lookupClearBtn.addEventListener('click', () => {
+      lAddress.value = '';
+      lCity.value = '';
+      lState.value = '';
+      lZip.value = '';
+      lookupResult.innerHTML = '';
+    });
 
     // Initial loads
     loadLatest();
