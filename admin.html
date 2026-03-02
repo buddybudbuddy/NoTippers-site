@@ -16,22 +16,27 @@
     header nav{display:flex;gap:12px;flex-wrap:wrap}
     header nav a{color:#fff;text-decoration:none;font-size:14px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.08)}
     header nav a:hover{background:rgba(255,255,255,.16)}
-    main{flex:1;max-width:1100px;margin:18px auto;padding:0 20px}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    main{flex:1;max-width:1200px;margin:18px auto;padding:0 20px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
     .controls select,.controls input{background:#0f1117;color:#e6e9ee;border:1px solid var(--border);border-radius:8px;padding:8px 10px}
     .controls button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:10px 12px;font-weight:700;cursor:pointer}
     .controls button.ghost{background:rgba(255,255,255,.08)}
+    .controls button:hover{filter:brightness(1.05)}
     .panel{background:#0f1117;border:1px solid var(--border);border-radius:16px;padding:14px}
     table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
-    th{color:#cfe2ff;text-align:left}
-    .tag{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;color:#adb5bd}
-    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .ok{background:#2f9e44}
-    .warn{background:#e03131}
+    th,td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;font-size:14px}
+    th{color:#cfe2ff;text-align:left;font-size:13px}
+    .tag{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:2px 8px;font-size:12px;color:#adb5bd;background:rgba(255,255,255,.03)}
     .muted{color:#9aa4b2}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-ok{background:#2f9e44}
+    .btn-warn{background:#e03131}
+    .btn-ghost{background:rgba(255,255,255,.08)}
+    .btn-ok,.btn-warn,.btn-ghost{color:#fff;border:0;border-radius:8px;padding:8px 10px;font-weight:800;cursor:pointer}
+    .btn-ok:hover,.btn-warn:hover,.btn-ghost:hover{filter:brightness(1.05)}
     footer{color:#9aa4b2;text-align:center;padding:16px;border-top:1px solid rgba(255,255,255,.06)}
-    @media (max-width:800px){ .hide-mobile{display:none} }
+    @media (max-width:980px){ .hide-mobile{display:none} }
   </style>
 </head>
 <body>
@@ -39,7 +44,8 @@
     <div class="logo">NoTippers — Admin</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="report.html">Report Address</a>
+      <a href="browse.html">Browse</a>
+      <a href="report.html">Report</a>
       <a href="login.html" id="loginLink">Log In</a>
       <a href="#" id="logoutLink" style="display:none">Log Out</a>
     </nav>
@@ -47,138 +53,192 @@
 
   <main>
     <h1 style="margin:6px 0 10px">Moderation Queue</h1>
+    <p class="muted" style="margin-top:-4px;line-height:1.35">
+      Approving a report flips <span class="tag">reviewed</span> to <span class="tag">true</span>.
+      Hidden reports (<span class="tag">is_hidden</span> = <span class="tag">true</span>) never appear publicly.
+      Exact addresses are not stored — only hashes.
+    </p>
 
     <div class="controls">
       <select id="filter">
-        <option value="pending">Pending (not reviewed, not hidden)</option>
-        <option value="reviewed">Reviewed</option>
-        <option value="hidden">Hidden</option>
+        <option value="pending">Pending (reviewed=false AND is_hidden=false)</option>
+        <option value="reviewed">Reviewed (reviewed=true AND is_hidden=false)</option>
+        <option value="hidden">Hidden (is_hidden=true)</option>
         <option value="all">All</option>
       </select>
-      <input id="search" type="search" placeholder="Search city / state / address…" />
+
+      <input id="search" type="search" placeholder="Search city/state/zip/type/notes/platforms/hash/area…" style="min-width:320px" />
+
       <button id="refresh">Refresh</button>
       <button id="export" class="ghost">Export CSV</button>
       <span class="muted" id="count"></span>
     </div>
 
     <div class="panel">
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th>Address</th>
-            <th class="hide-mobile">City/State/ZIP</th>
-            <th>Type / Platforms</th>
-            <th class="hide-mobile">Notes</th>
-            <th>When</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="6" class="muted">Loading…</td></tr>
-        </tbody>
-      </table>
+      <div style="overflow:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>When</th>
+              <th>City/State/ZIP</th>
+              <th>Signal</th>
+              <th class="hide-mobile">Platforms</th>
+              <th class="hide-mobile">Notes</th>
+              <th class="hide-mobile">Keys</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="7" class="muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </main>
 
   <footer>© <span id="y"></span> NoTippers</footer>
 
-  <!-- Supabase SDK + shared auth -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="auth.js"></script>
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // --- Supabase client (same keys you already use) ---
     const SUPABASE_URL = "https://gnkraxolcyrxpojrsolh.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_ZaE1ZrItKj1UG3icsjRNgw_ie-lbZnj";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
 
-    // Require admin (RLS policy should only allow admins to select/update here)
     (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        location.href = 'login.html?next=' + encodeURIComponent(location.pathname);
-        return;
-      }
-      // Optional: do a quick check your RLS allows only admins to read
-      // If not allowed, the query below will error and we redirect.
+      const session = await window.NotippersAuth?.requireAuth(true);
+      if (!session) return;
       loadRows();
     })();
 
-    const rowsEl = document.getElementById('rows');
+    const rowsEl   = document.getElementById('rows');
     const filterEl = document.getElementById('filter');
     const searchEl = document.getElementById('search');
     const refreshBtn = document.getElementById('refresh');
-    const exportBtn = document.getElementById('export');
-    const countEl = document.getElementById('count');
+    const exportBtn  = document.getElementById('export');
+    const countEl    = document.getElementById('count');
 
     filterEl.addEventListener('change', loadRows);
-    searchEl.addEventListener('input', debounce(loadRows, 300));
+    searchEl.addEventListener('input', debounce(loadRows, 250));
     refreshBtn.addEventListener('click', loadRows);
     exportBtn.addEventListener('click', exportCSV);
 
-    async function loadRows(){
-      rowsEl.innerHTML = '<tr><td colspan="6" class="muted">Loading…</td></tr>';
+    function esc(s){
+      return (s ?? '').toString().replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+    function debounce(fn, ms){ let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
-      // Build filter
-      const view = filterEl.value;
-      let query = sb.from('reports').select('*').order('created_at', { ascending:false }).limit(200);
+    function parsePlatforms(val){
+      if (val == null) return '';
+      if (Array.isArray(val)) return val.join(', ');
 
-      if (view === 'pending') query = query.eq('is_reviewed', false).eq('is_hidden', false);
-      if (view === 'reviewed') query = query.eq('is_reviewed', true);
-      if (view === 'hidden') query = query.eq('is_hidden', true);
+      const s = String(val).trim();
+      if (!s) return '';
 
-      // Basic search (case-insensitive) on a few columns
-      const q = (searchEl.value || '').trim();
-      if (q) {
-        // ilike on multiple columns — simple client side combine
-        const { data, error } = await query;
-        if (error) { handleError(error); return; }
-        const lc = q.toLowerCase();
-        const filtered = (data || []).filter(r =>
-          [r.address_line1, r.city, r.state, r.zip, r.notes].filter(Boolean).join(' ').toLowerCase().includes(lc)
-        );
-        renderRows(filtered);
-      } else {
-        const { data, error } = await query;
-        if (error) { handleError(error); return; }
-        renderRows(data || []);
+      // try JSON array
+      if (s.startsWith('[') && s.endsWith(']')) {
+        try {
+          const arr = JSON.parse(s);
+          if (Array.isArray(arr)) return arr.join(', ');
+        } catch {}
       }
+      return s;
     }
 
-    function renderRows(items){
-      countEl.textContent = items.length ? `${items.length} records` : '0 records';
-      if (!items.length) {
-        rowsEl.innerHTML = '<tr><td colspan="6" class="muted">No records.</td></tr>';
+    function labelType(t){
+      return t === 'bait_tipper' ? 'Bait-Tipper' :
+             t === 'non_tipper'  ? 'Non-Tipper'  :
+             t === 'tips'        ? 'Known for tips' :
+             t === 'no_tips'     ? 'Known not to tip' :
+             (t || '');
+    }
+
+    async function loadRows(){
+      rowsEl.innerHTML = '<tr><td colspan="7" class="muted">Loading…</td></tr>';
+
+      const view = filterEl.value;
+      const q = (searchEl.value || '').trim().toLowerCase();
+
+      let query = sb
+        .from('reports')
+        .select('id,created_at,city,state,zip,type,platforms,notes,reviewed,is_hidden,address_hash,area_key')
+        .order('created_at', { ascending:false })
+        .limit(250);
+
+      if (view === 'pending')  query = query.eq('reviewed', false).eq('is_hidden', false);
+      if (view === 'reviewed') query = query.eq('reviewed', true).eq('is_hidden', false);
+      if (view === 'hidden')   query = query.eq('is_hidden', true);
+
+      const { data, error } = await query;
+      if (error) {
+        console.error(error);
+        rowsEl.innerHTML = '<tr><td colspan="7" class="muted">Error loading data. Check RLS / permissions.</td></tr>';
+        countEl.textContent = '';
         return;
       }
-      rowsEl.innerHTML = items.map(r => rowHTML(r)).join('');
-      // attach action handlers
+
+      let items = data || [];
+      if (q) {
+        items = items.filter(r => {
+          const hay = [
+            r.city, r.state, r.zip, r.type, r.notes, r.platforms, r.area_key, r.address_hash
+          ].filter(Boolean).join(' ').toLowerCase();
+          return hay.includes(q);
+        });
+      }
+
+      countEl.textContent = items.length ? `${items.length} records` : '0 records';
+
+      if (!items.length) {
+        rowsEl.innerHTML = '<tr><td colspan="7" class="muted">No records.</td></tr>';
+        return;
+      }
+
+      rowsEl.innerHTML = items.map(rowHTML).join('');
       items.forEach(r => attachRowHandlers(r.id));
     }
 
     function rowHTML(r){
-      const when = new Date(r.created_at).toLocaleString();
-      const platforms = Array.isArray(r.platforms) ? r.platforms.join(', ') : (r.platforms || '');
+      const when = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+      const platforms = parsePlatforms(r.platforms);
+      const state = (r.state || '').toUpperCase();
+      const zip = (r.zip || '').trim();
+
+      const hashShort = (r.address_hash || '').slice(0, 10);
+      const areaShort = (r.area_key || '').slice(0, 28) + ((r.area_key || '').length > 28 ? '…' : '');
+
+      const reviewedTag = r.reviewed ? '<span class="tag">reviewed</span>' : '<span class="tag">pending</span>';
+      const hiddenTag = r.is_hidden ? '<span class="tag">hidden</span>' : '';
+
       return `
-        <tr id="row-${r.id}">
-          <td>
-            <div><strong>${esc(r.address_line1)}</strong>${r.address_line2 ? ', '+esc(r.address_line2) : ''}</div>
-            <div class="tag">${esc(r.id)}</div>
+        <tr id="row-${esc(r.id)}">
+          <td>${esc(when)}<div style="margin-top:6px">${reviewedTag} ${hiddenTag}</div></td>
+          <td><div><strong>${esc(r.city || '')}</strong>${r.city && state ? ', ' : ''}${esc(state)}${zip ? ' ' + esc(zip) : ''}</div></td>
+          <td><span class="tag">${esc(labelType(r.type))}</span></td>
+          <td class="hide-mobile">${platforms ? esc(platforms) : '<span class="muted">—</span>'}</td>
+          <td class="hide-mobile">${r.notes ? esc(r.notes) : '<span class="muted">—</span>'}</td>
+          <td class="hide-mobile">
+            <div class="mono muted">hash: ${esc(hashShort)}…</div>
+            <div class="mono muted">area: ${esc(areaShort)}</div>
           </td>
-          <td class="hide-mobile">${esc(r.city || '')}, ${esc(r.state || '')} ${esc(r.zip || '')}</td>
-          <td>
-            <div class="tag">${esc(r.type)}</div>
-            ${platforms ? `<div class="muted" style="margin-top:4px">${esc(platforms)}</div>` : ''}
-          </td>
-          <td class="hide-mobile">${esc(r.notes || '')}${r.story_url ? `<div><a href="${esc(r.story_url)}" target="_blank" rel="noopener">story/video →</a></div>` : ''}</td>
-            <td>${when}</td>
           <td>
             <div class="row-actions">
-              ${!r.is_reviewed && !r.is_hidden ? `<button class="ok" data-act="approve" data-id="${r.id}">Approve</button>` : ''}
-              ${!r.is_hidden ? `<button class="warn" data-act="hide" data-id="${r.id}">Hide</button>` : `<span class="muted">Hidden</span>`}
-              ${r.is_reviewed ? `<span class="muted">Reviewed</span>` : ''}
+              ${(!r.reviewed && !r.is_hidden)
+                ? `<button class="btn-ok" data-act="approve" data-id="${esc(r.id)}">Approve</button>`
+                : ''
+              }
+              ${(!r.is_hidden)
+                ? `<button class="btn-warn" data-act="hide" data-id="${esc(r.id)}">Hide</button>`
+                : `<button class="btn-ghost" data-act="unhide" data-id="${esc(r.id)}">Unhide</button>`
+              }
             </div>
+            <div class="muted" style="margin-top:6px;font-size:12px">Actions should be protected by RLS.</div>
           </td>
         </tr>
       `;
@@ -186,53 +246,69 @@
 
     function attachRowHandlers(id){
       const row = document.getElementById(`row-${id}`);
+      if (!row) return;
+
       row.querySelectorAll('button[data-act]').forEach(btn => {
         btn.addEventListener('click', async () => {
           const act = btn.getAttribute('data-act');
-          if (act === 'approve') await approve(id);
-          if (act === 'hide') await hideRec(id);
+          if (act === 'approve') await sb.from('reports').update({ reviewed: true }).eq('id', id);
+          if (act === 'hide') {
+            if (!confirm('Hide this report from public views?')) return;
+            await sb.from('reports').update({ is_hidden: true }).eq('id', id);
+          }
+          if (act === 'unhide') await sb.from('reports').update({ is_hidden: false }).eq('id', id);
+
+          // reload after action
+          loadRows();
         });
       });
     }
 
-    async function approve(id){
-      const { error } = await sb.from('reports').update({ is_reviewed: true }).eq('id', id);
-      if (error) return handleError(error);
-      // remove row from pending list instantly
-      const tr = document.getElementById(`row-${id}`); if (tr) tr.remove();
-    }
-
-    async function hideRec(id){
-      if (!confirm('Hide this report from public views?')) return;
-      const { error } = await sb.from('reports').update({ is_hidden: true }).eq('id', id);
-      if (error) return handleError(error);
-      const tr = document.getElementById(`row-${id}`); if (tr) tr.remove();
-    }
-
     function exportCSV(){
-      const rows = [...document.querySelectorAll('#rows tr')].map(tr => [...tr.children].map(td => td.innerText.replace(/\n/g,' ').trim()));
-      if (!rows.length) return;
+      const items = [...document.querySelectorAll('#rows tr')];
+      if (!items.length) return;
 
-      // drop the “Actions” column text
-      const cleaned = rows.map(cols => cols.slice(0, 5));
-      const header = ['Address','City/State/ZIP','Type/Platforms','Notes','When'];
-      const csv = [header, ...cleaned].map(r => r.map(csvEscape).join(',')).join('\n');
+      const header = ['When','City','State','ZIP','Type','Platforms','Notes','Reviewed','Hidden','Area Key','Address Hash'];
+      const csvRows = [header];
+
+      items.forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        if (!tds.length) return;
+
+        const when = (tds[0]?.innerText || '').split('\n')[0].trim();
+        const loc  = (tds[1]?.innerText || '').trim();
+        const type = (tds[2]?.innerText || '').trim();
+        const plats= (tds[3]?.innerText || '').trim();
+        const notes= (tds[4]?.innerText || '').trim();
+        const keys = (tds[5]?.innerText || '').trim();
+        const flags = (tds[0]?.innerText || '').toLowerCase();
+        const reviewed = flags.includes('reviewed') ? 'true' : 'false';
+        const hidden = flags.includes('hidden') ? 'true' : 'false';
+
+        let city='', state='', zip='';
+        const m = loc.match(/^(.+?)(?:,\s*([A-Z]{2}))?(?:\s+(\d{5}(?:-\d{4})?))?$/);
+        if (m) { city = (m[1]||'').trim(); state=(m[2]||'').trim(); zip=(m[3]||'').trim(); }
+
+        const areaKey = keys.split('\n').find(x => x.includes('area:'))?.replace('area:','').trim() || '';
+        const addrHash = keys.split('\n').find(x => x.includes('hash:'))?.replace('hash:','').trim() || '';
+
+        csvRows.push([when, city, state, zip, type, plats, notes, reviewed, hidden, areaKey, addrHash].map(csvEscape));
+      });
+
+      const csv = csvRows.map(r => r.join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `reports-${new Date().toISOString().slice(0,10)}.csv`;
+      a.href = url;
+      a.download = `reports-${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    function csvEscape(s){ s = s || ''; if (s.includes(',') || s.includes('"')) return `"${s.replace(/"/g,'""')}"`; return s; }
-    function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-    function debounce(fn, ms){ let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
-    function handleError(err){
-      console.error(err);
-      alert(err?.message || 'Permission error. Make sure RLS allows admins to read/update.');
-      // Optional redirect if not admin:
-      // location.href = 'login.html';
+    function csvEscape(v){
+      v = (v ?? '').toString().replace(/\n/g,' ').trim();
+      if (v.includes(',') || v.includes('"')) return `"${v.replace(/"/g,'""')}"`;
+      return v;
     }
   </script>
 </body>
